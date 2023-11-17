@@ -16,15 +16,43 @@ function getTempDb() {
   for (const sheetName of workbook.SheetNames) {
     data[`${sheetName}`] = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
   }
-  //   console.log("Data to parse");
-  //   console.log(data);
+
   try {
     const parsedData = parseTempDb(data);
     _db = parsedData;
   } catch (error) {
     console.error("ERROR PARSING DATABASE: " + error);
   }
+
   return _db;
+}
+
+export function getDesigns() {
+  const db = getTempDb();
+  if (!db) return undefined;
+
+  return db.Designs;
+}
+
+export function getCategories() {
+  const db = getTempDb();
+  if (!db) return undefined;
+
+  return db.Categories;
+}
+
+export function getSubcategories() {
+  const db = getTempDb();
+  if (!db) return undefined;
+
+  return db.Subcategories;
+}
+
+export function getTags() {
+  const db = getTempDb();
+  if (!db) return undefined;
+
+  return db.Tags;
 }
 
 export function findDesign(name: string) {
