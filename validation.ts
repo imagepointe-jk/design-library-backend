@@ -7,7 +7,7 @@ import {
 export function parseDesign(json: any) {
   json.DefaultBackgroundColor = json["Default Background Color"];
   json.ScreenPrint = json["Screen Print"];
-  json.ImageURL = json["Image URL"];
+  json.DropboxImagePath = json["Dropbox Image Path"];
 
   json.ScreenPrint = json.ScreenPrint === "Yes" ? true : false;
   json.Embroidery = json.Embroidery === "Yes" ? true : false;

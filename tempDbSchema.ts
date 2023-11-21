@@ -16,7 +16,7 @@ export const tempDesignSchema = z.object({
   Tag3: z.string().optional(),
   Tag4: z.string().optional(),
   Tag5: z.string().optional(),
-  ImageURL: z.string(),
+  DropboxImagePath: z.string(),
 });
 
 export const tempSubcategorySchema = z.object({

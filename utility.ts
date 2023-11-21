@@ -7,3 +7,12 @@ export function message(message: string) {
 export function trySplitCommaSeparatedString(data: any) {
   return typeof data === "string" ? data.split(",") : undefined;
 }
+
+export function getArrayPage(
+  array: any[],
+  pageNumber: number,
+  countPerPage: number
+) {
+  const startIndex = countPerPage * (pageNumber - 1);
+  return array.slice(startIndex, startIndex + countPerPage);
+}
