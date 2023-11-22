@@ -5,6 +5,7 @@ import {
   getDesigns,
   getSubcategories,
   getTags,
+  populateDesignImageURLs,
 } from "./dbLogic";
 import { filterDesign } from "./searchFilter";
 import { INTERNAL_SERVER_ERROR, NOT_FOUND, OK } from "./statusCodes";
@@ -47,7 +48,7 @@ app.get("/designs", async (req, res) => {
   const pageNumberToUse = pageNumber !== undefined ? +pageNumber : 1;
 
   try {
-    const designs = await getDesigns(dropboxCredentials);
+    const designs = getDesigns();
     if (!designs) {
       throw new Error(errorMessages.serverError);
     }
@@ -59,7 +60,11 @@ app.get("/designs", async (req, res) => {
       !embroidery;
     if (noFilters) {
       const paginated = getPageOfArray(designs, pageNumberToUse, amountPerPage);
-      return res.status(OK).send(paginated);
+      const withImageLinks = await populateDesignImageURLs(
+        paginated,
+        dropboxCredentials
+      );
+      return res.status(OK).send(withImageLinks);
     }
 
     const filteredDesigns = designs.filter((design) =>
@@ -80,7 +85,11 @@ app.get("/designs", async (req, res) => {
       pageNumberToUse,
       amountPerPage
     );
-    res.status(status).send(paginated);
+    const withImageLinks = await populateDesignImageURLs(
+      paginated,
+      dropboxCredentials
+    );
+    res.status(status).send(withImageLinks);
   } catch (error) {
     if (error instanceof Error)
       return res.status(INTERNAL_SERVER_ERROR).send(message(error.message));

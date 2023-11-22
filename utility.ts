@@ -16,3 +16,9 @@ export function getArrayPage(
   const startIndex = countPerPage * (pageNumber - 1);
   return array.slice(startIndex, startIndex + countPerPage);
 }
+
+export function isSettledPromiseFulfilled<T>(
+  input: PromiseSettledResult<T>
+): input is PromiseFulfilledResult<T> {
+  return input.status === "fulfilled";
+}

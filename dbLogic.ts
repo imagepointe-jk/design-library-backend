@@ -2,17 +2,14 @@ import fs from "fs";
 import xlsx from "xlsx";
 import { errorMessages } from "./constants";
 import { getDropboxFileURL } from "./fetch";
-import { TempDb, TempDesignWithImage } from "./tempDbSchema";
+import { TempDesign, TempDesignWithImage } from "./tempDbSchema";
 import { DropboxCredentials } from "./types";
 import { parseTempDb } from "./validation";
+import { isSettledPromiseFulfilled } from "./utility";
 
 //? A spreadsheet is being used as a temporary pseudo-database.
 //? Use XLSX to read in the entire DB and store it as JSON.
-let _db: TempDb | undefined = undefined;
-
 function getTempDb() {
-  if (_db !== undefined) return _db;
-
   const file = fs.readFileSync("./samples/sampleTempDb.xlsx");
   const workbook = xlsx.read(file, { type: "buffer" });
   const data: any = {};
@@ -21,39 +18,20 @@ function getTempDb() {
   }
 
   try {
-    const parsedData = parseTempDb(data);
-    _db = parsedData;
+    return parseTempDb(data);
   } catch (error) {
     console.error("ERROR PARSING DATABASE: " + error);
     throw new Error(errorMessages.serverError);
   }
-
-  return _db;
 }
 
-export async function getDesigns(
-  dropboxCredentials: DropboxCredentials
-): Promise<TempDesignWithImage[]> {
+export function getDesigns(): TempDesign[] {
   const db = getTempDb();
   if (!db) {
     console.error("Could not reach database");
     throw new Error(errorMessages.serverError);
   }
-  const designsWithImages: TempDesignWithImage[] = db.Designs.map((design) => ({
-    ...design,
-    ImageURL: "",
-  }));
-
-  for (const design of designsWithImages) {
-    const url = await getDropboxFileURL(
-      design.DropboxImagePath,
-      dropboxCredentials
-    );
-    if (!url) continue;
-    design.ImageURL = url;
-  }
-
-  return designsWithImages;
+  return db.Designs;
 }
 
 export function getCategories() {
@@ -77,22 +55,16 @@ export function getTags() {
   return db.Tags;
 }
 
-export async function findDesign(
-  name: string,
-  dropboxCredentials: DropboxCredentials
-) {
-  const designs = await getDesigns(dropboxCredentials);
+export async function findDesign(name: string) {
+  const designs = getDesigns();
   if (!designs) return undefined;
 
   const result = designs.find((design) => design.Name === name);
   return result;
 }
 
-export async function findDesignsInSubcategory(
-  subcategory: string,
-  dropboxCredentials: DropboxCredentials
-) {
-  const designs = await getDesigns(dropboxCredentials);
+export async function findDesignsInSubcategory(subcategory: string) {
+  const designs = getDesigns();
   if (!designs) return undefined;
 
   const result = designs.filter((design) => {
@@ -117,4 +89,26 @@ export async function findDesignsInSubcategory(
   });
 
   return result;
+}
+
+export async function populateDesignImageURLs(
+  designs: TempDesign[],
+  dropboxCredentials: DropboxCredentials
+): Promise<TempDesignWithImage[]> {
+  const requests = designs.map((design) =>
+    getDropboxFileURL(design.DropboxImagePath, dropboxCredentials)
+  );
+  const results = await Promise.allSettled(requests);
+  const designsWithImages: TempDesignWithImage[] = designs.map((design, i) => {
+    const linkResult = results[i];
+    const ImageURL = isSettledPromiseFulfilled(linkResult)
+      ? linkResult.value
+      : "";
+    return {
+      ...design,
+      ImageURL,
+    };
+  });
+
+  return designsWithImages;
 }
