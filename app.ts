@@ -1,23 +1,41 @@
 import express, { json } from "express";
+import { defaultCountPerPage, errorMessages } from "./constants";
 import {
   getCategories,
   getDesigns,
   getSubcategories,
   getTags,
 } from "./dbLogic";
+import { filterDesign } from "./searchFilter";
 import { INTERNAL_SERVER_ERROR, NOT_FOUND, OK } from "./statusCodes";
+import { DropboxCredentials } from "./types";
 import {
   getArrayPage as getPageOfArray,
   message,
   trySplitCommaSeparatedString,
 } from "./utility";
-import { defaultCountPerPage, errorMessages } from "./constants";
-import { filterDesign } from "./searchFilter";
 
 const app = express();
 app.use(json());
+if (app.get("env") === "development") {
+  console.log("=====DEV ENVIRONMENT======");
+  require("dotenv").config();
+}
+const refreshToken = process.env.DROPBOX_REFRESH_TOKEN;
+const appKey = process.env.DROPBOX_APP_KEY;
+const appSecret = process.env.DROPBOX_APP_SECRET;
+if (!refreshToken || !appKey || !appSecret) {
+  console.error(
+    "Couldn't find at least one of the Dropbox environment variables!"
+  );
+}
+const dropboxCredentials: DropboxCredentials = {
+  refreshToken: refreshToken!,
+  appKey: appKey!,
+  appSecret: appSecret!,
+};
 
-app.get("/designs", (req, res) => {
+app.get("/designs", async (req, res) => {
   const { subcategories, keywords, tags, perPage, pageNumber } = req.query;
 
   const subcategoriesArray = trySplitCommaSeparatedString(subcategories);
@@ -28,41 +46,45 @@ app.get("/designs", (req, res) => {
   const amountPerPage = perPage !== undefined ? +perPage : defaultCountPerPage;
   const pageNumberToUse = pageNumber !== undefined ? +pageNumber : 1;
 
-  const designs = getDesigns();
-  if (!designs)
-    return res
-      .status(INTERNAL_SERVER_ERROR)
-      .send(message(errorMessages.serverError));
-  const noFilters =
-    (!subcategoriesArray || subcategoriesArray.length === 0) &&
-    (!keywordsArray || keywordsArray.length === 0) &&
-    (!tagsArray || tagsArray.length === 0) &&
-    !screenPrint &&
-    !embroidery;
-  if (noFilters) {
-    const paginated = getPageOfArray(designs, pageNumberToUse, amountPerPage);
-    return res.status(OK).send(paginated);
+  try {
+    const designs = await getDesigns(dropboxCredentials);
+    if (!designs) {
+      throw new Error(errorMessages.serverError);
+    }
+    const noFilters =
+      (!subcategoriesArray || subcategoriesArray.length === 0) &&
+      (!keywordsArray || keywordsArray.length === 0) &&
+      (!tagsArray || tagsArray.length === 0) &&
+      !screenPrint &&
+      !embroidery;
+    if (noFilters) {
+      const paginated = getPageOfArray(designs, pageNumberToUse, amountPerPage);
+      return res.status(OK).send(paginated);
+    }
+
+    const filteredDesigns = designs.filter((design) =>
+      filterDesign(
+        design,
+        keywordsArray,
+        subcategoriesArray,
+        tagsArray,
+        screenPrint,
+        embroidery
+      )
+    );
+
+    const status = filteredDesigns.length === 0 ? NOT_FOUND : OK;
+
+    const paginated = getPageOfArray(
+      filteredDesigns,
+      pageNumberToUse,
+      amountPerPage
+    );
+    res.status(status).send(paginated);
+  } catch (error) {
+    if (error instanceof Error)
+      return res.status(INTERNAL_SERVER_ERROR).send(message(error.message));
   }
-
-  const filteredDesigns = designs.filter((design) =>
-    filterDesign(
-      design,
-      keywordsArray,
-      subcategoriesArray,
-      tagsArray,
-      screenPrint,
-      embroidery
-    )
-  );
-
-  const status = filteredDesigns.length === 0 ? NOT_FOUND : OK;
-
-  const paginated = getPageOfArray(
-    filteredDesigns,
-    pageNumberToUse,
-    amountPerPage
-  );
-  res.status(status).send(paginated);
 });
 
 app.get("/categories", (req, res) => {

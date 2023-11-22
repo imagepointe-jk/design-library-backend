@@ -1,6 +1,9 @@
-import xlsx from "xlsx";
 import fs from "fs";
-import { TempDb } from "./tempDbSchema";
+import xlsx from "xlsx";
+import { errorMessages } from "./constants";
+import { getDropboxFileURL } from "./fetch";
+import { TempDb, TempDesignWithImage } from "./tempDbSchema";
+import { DropboxCredentials } from "./types";
 import { parseTempDb } from "./validation";
 
 //? A spreadsheet is being used as a temporary pseudo-database.
@@ -22,16 +25,35 @@ function getTempDb() {
     _db = parsedData;
   } catch (error) {
     console.error("ERROR PARSING DATABASE: " + error);
+    throw new Error(errorMessages.serverError);
   }
 
   return _db;
 }
 
-export function getDesigns() {
+export async function getDesigns(
+  dropboxCredentials: DropboxCredentials
+): Promise<TempDesignWithImage[]> {
   const db = getTempDb();
-  if (!db) return undefined;
+  if (!db) {
+    console.error("Could not reach database");
+    throw new Error(errorMessages.serverError);
+  }
+  const designsWithImages: TempDesignWithImage[] = db.Designs.map((design) => ({
+    ...design,
+    ImageURL: "",
+  }));
 
-  return db.Designs;
+  for (const design of designsWithImages) {
+    const url = await getDropboxFileURL(
+      design.DropboxImagePath,
+      dropboxCredentials
+    );
+    if (!url) continue;
+    design.ImageURL = url;
+  }
+
+  return designsWithImages;
 }
 
 export function getCategories() {
@@ -55,18 +77,25 @@ export function getTags() {
   return db.Tags;
 }
 
-export function findDesign(name: string) {
-  const db = getTempDb();
-  if (!db) return undefined;
-  const result = db.Designs.find((design) => design.Name === name);
+export async function findDesign(
+  name: string,
+  dropboxCredentials: DropboxCredentials
+) {
+  const designs = await getDesigns(dropboxCredentials);
+  if (!designs) return undefined;
+
+  const result = designs.find((design) => design.Name === name);
   return result;
 }
 
-export function findDesignsInSubcategory(subcategory: string) {
-  const db = getTempDb();
-  if (!db) return undefined;
+export async function findDesignsInSubcategory(
+  subcategory: string,
+  dropboxCredentials: DropboxCredentials
+) {
+  const designs = await getDesigns(dropboxCredentials);
+  if (!designs) return undefined;
 
-  const result = db.Designs.filter((design) => {
+  const result = designs.filter((design) => {
     const {
       Subcategory1,
       Subcategory2,

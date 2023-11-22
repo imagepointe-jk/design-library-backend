@@ -19,6 +19,11 @@ export const tempDesignSchema = z.object({
   DropboxImagePath: z.string(),
 });
 
+export const tempDesignWithImageSchema = z.intersection(
+  tempDesignSchema,
+  z.object({ ImageURL: z.string() })
+);
+
 export const tempSubcategorySchema = z.object({
   Name: z.string(),
   ParentCategory: z.string(),
@@ -33,4 +38,5 @@ export const tempDbSchema = z.object({
 });
 
 export type TempDesign = z.infer<typeof tempDesignSchema>;
+export type TempDesignWithImage = z.infer<typeof tempDesignWithImageSchema>;
 export type TempDb = z.infer<typeof tempDbSchema>;
