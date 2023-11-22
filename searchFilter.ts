@@ -63,11 +63,15 @@ function matchDesignSubcategories(
     Subcategory3,
     Subcategory4,
     Subcategory5,
-  ].some(
-    (subcategory) =>
-      subcategory &&
-      lowerCaseQuerySubcategories?.includes(subcategory.toLocaleLowerCase())
-  );
+  ].some((subcategory) => {
+    const withoutParentCategory = subcategory && subcategory.split(" > ")[1];
+    const withHyphens =
+      withoutParentCategory && withoutParentCategory.replace(" ", "-");
+    return (
+      withHyphens &&
+      lowerCaseQuerySubcategories?.includes(withHyphens.toLocaleLowerCase())
+    );
+  });
 }
 
 function matchDesignTags(design: TempDesign, queryTagsArray?: string[]) {

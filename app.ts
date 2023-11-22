@@ -17,8 +17,21 @@ import {
 } from "./utility";
 
 const app = express();
+const devMode = app.get("env") === "development";
+
+const allowedOrigins = [""];
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && (devMode || allowedOrigins.includes(origin))) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
+  res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
+});
+
 app.use(json());
-if (app.get("env") === "development") {
+if (devMode) {
   console.log("=====DEV ENVIRONMENT======");
   require("dotenv").config();
 }
