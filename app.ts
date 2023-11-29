@@ -6,6 +6,7 @@ import {
   getSubcategories,
   getTags,
   populateDesignImageURLs,
+  populateSingleDesignImageURL,
 } from "./dbLogic";
 import { filterDesign } from "./searchFilter";
 import { INTERNAL_SERVER_ERROR, NOT_FOUND, OK } from "./statusCodes";
@@ -49,9 +50,11 @@ const dropboxCredentials: DropboxCredentials = {
   appSecret: appSecret!,
 };
 
-app.get("/designs", async (req, res) => {
+app.get("/designs/:designId", async (req, res) => {
   const { subcategories, keywords, tags, perPage, pageNumber } = req.query;
+  const { designId: designIdStr } = req.params;
 
+  const designId = !isNaN(+designIdStr) ? +designIdStr : undefined;
   const subcategoriesArray = trySplitCommaSeparatedString(subcategories);
   const keywordsArray = trySplitCommaSeparatedString(keywords);
   const tagsArray = trySplitCommaSeparatedString(tags);
@@ -65,6 +68,18 @@ app.get("/designs", async (req, res) => {
     if (!designs) {
       throw new Error(errorMessages.serverError);
     }
+
+    if (designId !== undefined) {
+      const designWithId = designs.find((design) => design.ID === designId);
+      if (!designWithId)
+        return res.status(404).send(message(`Design ${designId} not found.`));
+      const designWithImage = await populateSingleDesignImageURL(
+        designWithId,
+        dropboxCredentials
+      );
+      return res.status(OK).send(designWithImage);
+    }
+
     const noFilters =
       (!subcategoriesArray || subcategoriesArray.length === 0) &&
       (!keywordsArray || keywordsArray.length === 0) &&

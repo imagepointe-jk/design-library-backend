@@ -17,6 +17,7 @@ export const tempDesignSchema = z.object({
   Tag4: z.string().optional(),
   Tag5: z.string().optional(),
   DropboxImagePath: z.string(),
+  ID: z.number(),
 });
 
 export const tempDesignWithImageSchema = z.intersection(

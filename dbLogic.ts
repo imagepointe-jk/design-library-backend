@@ -91,6 +91,21 @@ export async function findDesignsInSubcategory(subcategory: string) {
   return result;
 }
 
+export async function populateSingleDesignImageURL(
+  design: TempDesign,
+  dropboxCredentials: DropboxCredentials
+): Promise<TempDesignWithImage> {
+  const ImageURL = await getDropboxFileURL(
+    design.DropboxImagePath,
+    dropboxCredentials
+  );
+  const designWithImage: TempDesignWithImage = {
+    ...design,
+    ImageURL,
+  };
+  return designWithImage;
+}
+
 export async function populateDesignImageURLs(
   designs: TempDesign[],
   dropboxCredentials: DropboxCredentials
