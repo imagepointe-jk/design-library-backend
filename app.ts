@@ -50,11 +50,12 @@ const dropboxCredentials: DropboxCredentials = {
   appSecret: appSecret!,
 };
 
-app.get("/designs/:designId", async (req, res) => {
+app.get("/designs/:designId?", async (req, res) => {
   const { subcategories, keywords, tags, perPage, pageNumber } = req.query;
   const { designId: designIdStr } = req.params;
 
-  const designId = !isNaN(+designIdStr) ? +designIdStr : undefined;
+  const designId =
+    designIdStr && !isNaN(+designIdStr) ? +designIdStr : undefined;
   const subcategoriesArray = trySplitCommaSeparatedString(subcategories);
   const keywordsArray = trySplitCommaSeparatedString(keywords);
   const tagsArray = trySplitCommaSeparatedString(tags);
@@ -62,6 +63,7 @@ app.get("/designs/:designId", async (req, res) => {
   const embroidery = req.query.embroidery === "true";
   const amountPerPage = perPage !== undefined ? +perPage : defaultCountPerPage;
   const pageNumberToUse = pageNumber !== undefined ? +pageNumber : 1;
+  console.log("id is " + designId);
 
   try {
     const designs = getDesigns();
