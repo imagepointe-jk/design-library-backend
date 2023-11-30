@@ -20,7 +20,9 @@ import {
 const app = express();
 const devMode = app.get("env") === "development";
 
-const allowedOrigins = [""];
+const allowedOrigins = [
+  "https://react-frontend-production-93c4.up.railway.app",
+];
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (origin && (devMode || allowedOrigins.includes(origin))) {
