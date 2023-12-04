@@ -5,16 +5,27 @@ export function filterDesign(
   keywordsArray?: string[],
   subcategoriesArray?: string[],
   tagsArray?: string[],
-  designType?: DesignType
+  designType?: DesignType,
+  onlyFeatured?: boolean
 ) {
-  const { Tag1, Tag2, Tag3, Tag4, Tag5, Description, Name, DesignType } =
-    design;
+  const {
+    Tag1,
+    Tag2,
+    Tag3,
+    Tag4,
+    Tag5,
+    Description,
+    Name,
+    DesignType,
+    Featured,
+  } = design;
 
   return (
     matchDesignKeywords(design, keywordsArray) ||
     matchDesignSubcategories(design, subcategoriesArray) ||
     matchDesignTags(design, tagsArray) ||
-    designType === DesignType
+    designType === DesignType ||
+    (Featured && onlyFeatured === true)
   );
 }
 

@@ -13,6 +13,7 @@ import { INTERNAL_SERVER_ERROR, NOT_FOUND, OK } from "./statusCodes";
 import { DropboxCredentials } from "./types";
 import {
   getArrayPage as getPageOfArray,
+  makeStringTitleCase,
   message,
   trySplitCommaSeparatedString,
 } from "./utility";
@@ -62,6 +63,7 @@ app.get("/designs/:designNumber?", async (req, res) => {
     perPage,
     pageNumber,
     designtype: designTypeQuery,
+    featured,
   } = req.query;
   const { designNumber: designNumberStr } = req.params;
 
@@ -72,8 +74,9 @@ app.get("/designs/:designNumber?", async (req, res) => {
   const tagsArray = trySplitCommaSeparatedString(tags);
   let designType: DesignType | undefined;
   try {
-    designType = parseDesignType(`${designTypeQuery}`);
+    designType = parseDesignType(makeStringTitleCase(`${designTypeQuery}`));
   } catch (_) {}
+  const onlyFeatured = `${featured}` === `${true}`;
   const amountPerPage = perPage !== undefined ? +perPage : defaultCountPerPage;
   const pageNumberToUse = pageNumber !== undefined ? +pageNumber : 1;
 
@@ -102,7 +105,8 @@ app.get("/designs/:designNumber?", async (req, res) => {
       (!subcategoriesArray || subcategoriesArray.length === 0) &&
       (!keywordsArray || keywordsArray.length === 0) &&
       (!tagsArray || tagsArray.length === 0) &&
-      !designType;
+      !designType &&
+      !onlyFeatured;
     if (noFilters) {
       const paginated = getPageOfArray(designs, pageNumberToUse, amountPerPage);
       const withImageLinks = await populateDesignImageURLs(
@@ -118,7 +122,8 @@ app.get("/designs/:designNumber?", async (req, res) => {
         keywordsArray,
         subcategoriesArray,
         tagsArray,
-        designType
+        designType,
+        onlyFeatured
       )
     );
 

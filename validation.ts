@@ -9,6 +9,7 @@ export function parseDesign(json: any) {
   json.DefaultBackgroundColor = json["Default Background Color"];
   json.DesignType = json["Design Type"];
   json.DesignNumber = json["Design Number"];
+  json.Featured = json.Featured === "Yes" ? true : false;
 
   json.DropboxImagePath1 = json["Dropbox Image Path 1"];
   json.DropboxImagePath2 = json["Dropbox Image Path 2"];

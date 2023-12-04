@@ -22,3 +22,10 @@ export function isSettledPromiseFulfilled<T>(
 ): input is PromiseFulfilledResult<T> {
   return input.status === "fulfilled";
 }
+
+export function makeStringTitleCase(str: string) {
+  return str
+    .split(" ")
+    .map((word) => `${word[0].toUpperCase()}${word.substring(1)}`)
+    .join(" ");
+}
