@@ -1,31 +1,20 @@
-import { TempDesign } from "./tempDbSchema";
+import { DesignType, TempDesign } from "./tempDbSchema";
 
 export function filterDesign(
   design: TempDesign,
   keywordsArray?: string[],
   subcategoriesArray?: string[],
   tagsArray?: string[],
-  screenPrint?: boolean,
-  embroidery?: boolean
+  designType?: DesignType
 ) {
-  const {
-    Tag1,
-    Tag2,
-    Tag3,
-    Tag4,
-    Tag5,
-    Description,
-    Name,
-    Embroidery,
-    ScreenPrint,
-  } = design;
+  const { Tag1, Tag2, Tag3, Tag4, Tag5, Description, Name, DesignType } =
+    design;
 
   return (
     matchDesignKeywords(design, keywordsArray) ||
     matchDesignSubcategories(design, subcategoriesArray) ||
     matchDesignTags(design, tagsArray) ||
-    (screenPrint === true && ScreenPrint === true) ||
-    (embroidery === true && Embroidery === true)
+    designType === DesignType
   );
 }
 

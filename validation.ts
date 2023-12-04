@@ -1,4 +1,5 @@
 import {
+  designTypeSchema,
   tempDbSchema,
   tempDesignSchema,
   tempSubcategorySchema,
@@ -6,11 +7,16 @@ import {
 
 export function parseDesign(json: any) {
   json.DefaultBackgroundColor = json["Default Background Color"];
-  json.ScreenPrint = json["Screen Print"];
-  json.DropboxImagePath = json["Dropbox Image Path"];
+  json.DesignType = json["Design Type"];
+  json.DesignNumber = json["Design Number"];
 
-  json.ScreenPrint = json.ScreenPrint === "Yes" ? true : false;
-  json.Embroidery = json.Embroidery === "Yes" ? true : false;
+  json.DropboxImagePath1 = json["Dropbox Image Path 1"];
+  json.DropboxImagePath2 = json["Dropbox Image Path 2"];
+  json.DropboxImagePath3 = json["Dropbox Image Path 3"];
+  json.DropboxImagePath4 = json["Dropbox Image Path 4"];
+  json.DropboxImagePath5 = json["Dropbox Image Path 5"];
+  json.DropboxImagePath6 = json["Dropbox Image Path 6"];
+  json.DropboxImagePath7 = json["Dropbox Image Path 7"];
 
   return tempDesignSchema.parse(json);
 }
@@ -31,4 +37,8 @@ export function parseTempDb(json: any) {
   json.Subcategories = parsedSubcategories;
 
   return tempDbSchema.parse(json);
+}
+
+export function parseDesignType(str: string) {
+  return designTypeSchema.parse(str);
 }

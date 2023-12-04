@@ -2,7 +2,7 @@ import fs from "fs";
 import xlsx from "xlsx";
 import { errorMessages } from "./constants";
 import { getDropboxFileURL } from "./fetch";
-import { TempDesign, TempDesignWithImage } from "./tempDbSchema";
+import { TempDesign, TempDesignWithImages } from "./tempDbSchema";
 import { DropboxCredentials } from "./types";
 import { parseTempDb } from "./validation";
 import { isSettledPromiseFulfilled } from "./utility";
@@ -91,17 +91,30 @@ export async function findDesignsInSubcategory(subcategory: string) {
   return result;
 }
 
-export async function populateSingleDesignImageURL(
+export async function populateSingleDesignImageURLs(
   design: TempDesign,
   dropboxCredentials: DropboxCredentials
-): Promise<TempDesignWithImage> {
-  const ImageURL = await getDropboxFileURL(
-    design.DropboxImagePath,
-    dropboxCredentials
+): Promise<TempDesignWithImages> {
+  const designImgPaths = [
+    design.DropboxImagePath1,
+    design.DropboxImagePath2,
+    design.DropboxImagePath3,
+    design.DropboxImagePath4,
+    design.DropboxImagePath5,
+    design.DropboxImagePath6,
+    design.DropboxImagePath7,
+  ];
+  const requests = designImgPaths.map((path) =>
+    path ? getDropboxFileURL(path, dropboxCredentials) : ""
   );
-  const designWithImage: TempDesignWithImage = {
+  const results = await Promise.allSettled(requests);
+  const ImageURLs = results.map((result) =>
+    isSettledPromiseFulfilled(result) ? result.value : ""
+  );
+
+  const designWithImage: TempDesignWithImages = {
     ...design,
-    ImageURL,
+    ImageURLs,
   };
   return designWithImage;
 }
@@ -109,21 +122,36 @@ export async function populateSingleDesignImageURL(
 export async function populateDesignImageURLs(
   designs: TempDesign[],
   dropboxCredentials: DropboxCredentials
-): Promise<TempDesignWithImage[]> {
+): Promise<TempDesignWithImages[]> {
   const requests = designs.map((design) =>
-    getDropboxFileURL(design.DropboxImagePath, dropboxCredentials)
+    populateSingleDesignImageURLs(design, dropboxCredentials)
   );
   const results = await Promise.allSettled(requests);
-  const designsWithImages: TempDesignWithImage[] = designs.map((design, i) => {
-    const linkResult = results[i];
-    const ImageURL = isSettledPromiseFulfilled(linkResult)
-      ? linkResult.value
-      : "";
-    return {
-      ...design,
-      ImageURL,
-    };
+  const designsWithURLs = designs.map((design, i) => {
+    const result = results[i];
+    const designWithURL: TempDesignWithImages = isSettledPromiseFulfilled(
+      result
+    )
+      ? result.value
+      : { ...design, ImageURLs: [] };
+    return designWithURL;
   });
 
-  return designsWithImages;
+  return designsWithURLs;
+  // const requests = designs.map((design) =>
+  //   getDropboxFileURL(design.DropboxImagePath, dropboxCredentials)
+  // );
+  // const results = await Promise.allSettled(requests);
+  // const designsWithImages: TempDesignWithImage[] = designs.map((design, i) => {
+  //   const linkResult = results[i];
+  //   const ImageURL = isSettledPromiseFulfilled(linkResult)
+  //     ? linkResult.value
+  //     : "";
+  //   return {
+  //     ...design,
+  //     ImageURL,
+  //   };
+  // });
+
+  // return designsWithImages;
 }

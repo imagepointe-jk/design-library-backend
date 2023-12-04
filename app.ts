@@ -6,7 +6,7 @@ import {
   getSubcategories,
   getTags,
   populateDesignImageURLs,
-  populateSingleDesignImageURL,
+  populateSingleDesignImageURLs,
 } from "./dbLogic";
 import { filterDesign } from "./searchFilter";
 import { INTERNAL_SERVER_ERROR, NOT_FOUND, OK } from "./statusCodes";
@@ -16,6 +16,8 @@ import {
   message,
   trySplitCommaSeparatedString,
 } from "./utility";
+import { DesignType, designTypes } from "./tempDbSchema";
+import { parseDesignType } from "./validation";
 
 const app = express();
 const devMode = app.get("env") === "development";
@@ -52,20 +54,28 @@ const dropboxCredentials: DropboxCredentials = {
   appSecret: appSecret!,
 };
 
-app.get("/designs/:designId?", async (req, res) => {
-  const { subcategories, keywords, tags, perPage, pageNumber } = req.query;
-  const { designId: designIdStr } = req.params;
+app.get("/designs/:designNumber?", async (req, res) => {
+  const {
+    subcategories,
+    keywords,
+    tags,
+    perPage,
+    pageNumber,
+    designtype: designTypeQuery,
+  } = req.query;
+  const { designNumber: designNumberStr } = req.params;
 
-  const designId =
-    designIdStr && !isNaN(+designIdStr) ? +designIdStr : undefined;
+  const designNumber =
+    designNumberStr && !isNaN(+designNumberStr) ? +designNumberStr : undefined;
   const subcategoriesArray = trySplitCommaSeparatedString(subcategories);
   const keywordsArray = trySplitCommaSeparatedString(keywords);
   const tagsArray = trySplitCommaSeparatedString(tags);
-  const screenPrint = req.query.screenprint === "true";
-  const embroidery = req.query.embroidery === "true";
+  let designType: DesignType | undefined;
+  try {
+    designType = parseDesignType(`${designTypeQuery}`);
+  } catch (_) {}
   const amountPerPage = perPage !== undefined ? +perPage : defaultCountPerPage;
   const pageNumberToUse = pageNumber !== undefined ? +pageNumber : 1;
-  console.log("id is " + designId);
 
   try {
     const designs = getDesigns();
@@ -73,11 +83,15 @@ app.get("/designs/:designId?", async (req, res) => {
       throw new Error(errorMessages.serverError);
     }
 
-    if (designId !== undefined) {
-      const designWithId = designs.find((design) => design.ID === designId);
+    if (designNumber !== undefined) {
+      const designWithId = designs.find(
+        (design) => design.DesignNumber === designNumber
+      );
       if (!designWithId)
-        return res.status(404).send(message(`Design ${designId} not found.`));
-      const designWithImage = await populateSingleDesignImageURL(
+        return res
+          .status(404)
+          .send(message(`Design ${designNumber} not found.`));
+      const designWithImage = await populateSingleDesignImageURLs(
         designWithId,
         dropboxCredentials
       );
@@ -88,8 +102,7 @@ app.get("/designs/:designId?", async (req, res) => {
       (!subcategoriesArray || subcategoriesArray.length === 0) &&
       (!keywordsArray || keywordsArray.length === 0) &&
       (!tagsArray || tagsArray.length === 0) &&
-      !screenPrint &&
-      !embroidery;
+      !designType;
     if (noFilters) {
       const paginated = getPageOfArray(designs, pageNumberToUse, amountPerPage);
       const withImageLinks = await populateDesignImageURLs(
@@ -105,8 +118,7 @@ app.get("/designs/:designId?", async (req, res) => {
         keywordsArray,
         subcategoriesArray,
         tagsArray,
-        screenPrint,
-        embroidery
+        designType
       )
     );
 

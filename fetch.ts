@@ -4,6 +4,7 @@ import { DropboxCredentials } from "./types";
 
 let accessToken: string | undefined = undefined;
 const apiURL = "https://api.dropboxapi.com";
+const imageUrlCache: { [key: string]: string } = {};
 
 async function updateDropboxAccessToken({
   appKey,
@@ -41,6 +42,9 @@ export async function getDropboxFileURL(
   filePath: string,
   credentials: DropboxCredentials
 ): Promise<string> {
+  const cachedUrl = imageUrlCache[filePath];
+  if (cachedUrl !== undefined) return cachedUrl;
+
   if (!accessToken) await updateDropboxAccessToken(credentials);
 
   const headers = new Headers();
@@ -89,5 +93,6 @@ export async function getDropboxFileURL(
     throw new Error(errorMessages.serverError);
   }
 
+  imageUrlCache[filePath] = json.link;
   return json.link;
 }
