@@ -8,7 +8,7 @@ import {
   populateDesignImageURLs,
   populateSingleDesignImageURLs,
 } from "./dbLogic";
-import { filterDesign } from "./searchFilter";
+import { filterDesigns } from "./searchFilter";
 import { INTERNAL_SERVER_ERROR, NOT_FOUND, OK } from "./statusCodes";
 import { DropboxCredentials } from "./types";
 import {
@@ -20,15 +20,16 @@ import {
 import { DesignType, designTypes } from "./tempDbSchema";
 import { parseDesignType } from "./validation";
 
+// #region Setup
 const app = express();
-const devMode = app.get("env") === "development";
+const isDevMode = app.get("env") === "development";
 
 const allowedOrigins = [
   "https://react-frontend-production-93c4.up.railway.app",
 ];
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (origin && (devMode || allowedOrigins.includes(origin))) {
+  if (origin && (isDevMode || allowedOrigins.includes(origin))) {
     res.header("Access-Control-Allow-Origin", origin);
   }
   res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
@@ -37,7 +38,7 @@ app.use((req, res, next) => {
 });
 
 app.use(json());
-if (devMode) {
+if (isDevMode) {
   console.log("=====DEV ENVIRONMENT======");
   require("dotenv").config();
 }
@@ -54,6 +55,7 @@ const dropboxCredentials: DropboxCredentials = {
   appKey: appKey!,
   appSecret: appSecret!,
 };
+// #endregion
 
 app.get("/designs/:designNumber?", async (req, res) => {
   const {
@@ -72,7 +74,7 @@ app.get("/designs/:designNumber?", async (req, res) => {
   const subcategoriesArray = trySplitCommaSeparatedString(subcategories);
   const keywordsArray = trySplitCommaSeparatedString(keywords);
   const tagsArray = trySplitCommaSeparatedString(tags);
-  let designType: DesignType | undefined;
+  let designType: DesignType = "Screen Print";
   try {
     designType = parseDesignType(makeStringTitleCase(`${designTypeQuery}`));
   } catch (_) {}
@@ -81,7 +83,7 @@ app.get("/designs/:designNumber?", async (req, res) => {
   const pageNumberToUse = pageNumber !== undefined ? +pageNumber : 1;
 
   try {
-    const designs = getDesigns();
+    const designs = getDesigns(isDevMode);
     if (!designs) {
       throw new Error(errorMessages.serverError);
     }
@@ -101,30 +103,13 @@ app.get("/designs/:designNumber?", async (req, res) => {
       return res.status(OK).send(designWithImage);
     }
 
-    const noFilters =
-      (!subcategoriesArray || subcategoriesArray.length === 0) &&
-      (!keywordsArray || keywordsArray.length === 0) &&
-      (!tagsArray || tagsArray.length === 0) &&
-      !designType &&
-      !onlyFeatured;
-    if (noFilters) {
-      const paginated = getPageOfArray(designs, pageNumberToUse, amountPerPage);
-      const withImageLinks = await populateDesignImageURLs(
-        paginated,
-        dropboxCredentials
-      );
-      return res.status(OK).send(withImageLinks);
-    }
-
-    const filteredDesigns = designs.filter((design) =>
-      filterDesign(
-        design,
-        keywordsArray,
-        subcategoriesArray,
-        tagsArray,
-        designType,
-        onlyFeatured
-      )
+    const filteredDesigns = filterDesigns(
+      designs,
+      keywordsArray,
+      subcategoriesArray,
+      tagsArray,
+      designType,
+      onlyFeatured
     );
 
     const status = filteredDesigns.length === 0 ? NOT_FOUND : OK;
@@ -146,7 +131,7 @@ app.get("/designs/:designNumber?", async (req, res) => {
 });
 
 app.get("/categories", (req, res) => {
-  const categories = getCategories();
+  const categories = getCategories(isDevMode);
   if (!categories)
     res.status(INTERNAL_SERVER_ERROR).send(message(errorMessages.serverError));
 
@@ -154,7 +139,7 @@ app.get("/categories", (req, res) => {
 });
 
 app.get("/subcategories", (req, res) => {
-  const subcategories = getSubcategories();
+  const subcategories = getSubcategories(isDevMode);
   if (!subcategories)
     res.status(INTERNAL_SERVER_ERROR).send(message(errorMessages.serverError));
 
@@ -162,7 +147,7 @@ app.get("/subcategories", (req, res) => {
 });
 
 app.get("/tags", (req, res) => {
-  const tags = getTags();
+  const tags = getTags(isDevMode);
   if (!tags)
     res.status(INTERNAL_SERVER_ERROR).send(message(errorMessages.serverError));
 

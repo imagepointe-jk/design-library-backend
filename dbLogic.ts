@@ -9,15 +9,21 @@ import { isSettledPromiseFulfilled } from "./utility";
 
 //? A spreadsheet is being used as a temporary pseudo-database.
 //? Use XLSX to read in the entire DB and store it as JSON.
-function getTempDb() {
-  const file = fs.readFileSync("./samples/sampleTempDb.xlsx");
-  const workbook = xlsx.read(file, { type: "buffer" });
-  const data: any = {};
-  for (const sheetName of workbook.SheetNames) {
-    data[`${sheetName}`] = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
-  }
-
+function getTempDb(isDevMode: boolean) {
+  if (!isDevMode)
+    console.warn(
+      "======WARNING: Reading from the sample database while not running in development environment!"
+    );
   try {
+    const file = fs.readFileSync("./samples/sampleTempDb.xlsx");
+    const workbook = xlsx.read(file, { type: "buffer" });
+    const data: any = {};
+    for (const sheetName of workbook.SheetNames) {
+      data[`${sheetName}`] = xlsx.utils.sheet_to_json(
+        workbook.Sheets[sheetName]
+      );
+    }
+
     return parseTempDb(data);
   } catch (error) {
     console.error("ERROR PARSING DATABASE: " + error);
@@ -25,8 +31,8 @@ function getTempDb() {
   }
 }
 
-export function getDesigns(): TempDesign[] {
-  const db = getTempDb();
+export function getDesigns(isDevMode: boolean): TempDesign[] {
+  const db = getTempDb(isDevMode);
   if (!db) {
     console.error("Could not reach database");
     throw new Error(errorMessages.serverError);
@@ -34,37 +40,40 @@ export function getDesigns(): TempDesign[] {
   return db.Designs;
 }
 
-export function getCategories() {
-  const db = getTempDb();
+export function getCategories(isDevMode: boolean) {
+  const db = getTempDb(isDevMode);
   if (!db) return undefined;
 
   return db.Categories;
 }
 
-export function getSubcategories() {
-  const db = getTempDb();
+export function getSubcategories(isDevMode: boolean) {
+  const db = getTempDb(isDevMode);
   if (!db) return undefined;
 
   return db.Subcategories;
 }
 
-export function getTags() {
-  const db = getTempDb();
+export function getTags(isDevMode: boolean) {
+  const db = getTempDb(isDevMode);
   if (!db) return undefined;
 
   return db.Tags;
 }
 
-export async function findDesign(name: string) {
-  const designs = getDesigns();
+export async function findDesign(name: string, isDevMode: boolean) {
+  const designs = getDesigns(isDevMode);
   if (!designs) return undefined;
 
   const result = designs.find((design) => design.Name === name);
   return result;
 }
 
-export async function findDesignsInSubcategory(subcategory: string) {
-  const designs = getDesigns();
+export async function findDesignsInSubcategory(
+  subcategory: string,
+  isDevMode: boolean
+) {
+  const designs = getDesigns(isDevMode);
   if (!designs) return undefined;
 
   const result = designs.filter((design) => {

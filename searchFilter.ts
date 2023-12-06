@@ -1,50 +1,46 @@
 import { DesignType, TempDesign } from "./tempDbSchema";
 
-export function filterDesign(
-  design: TempDesign,
+export function filterDesigns(
+  designs: TempDesign[],
   keywordsArray?: string[],
   subcategoriesArray?: string[],
   tagsArray?: string[],
   designType?: DesignType,
   onlyFeatured?: boolean
 ) {
-  const {
-    Tag1,
-    Tag2,
-    Tag3,
-    Tag4,
-    Tag5,
-    Description,
-    Name,
-    DesignType,
-    Featured,
-  } = design;
-
-  return (
-    matchDesignKeywords(design, keywordsArray) ||
-    matchDesignSubcategories(design, subcategoriesArray) ||
-    matchDesignTags(design, tagsArray) ||
-    designType === DesignType ||
-    (Featured && onlyFeatured === true)
-  );
+  return designs.filter((design) => {
+    const { DesignType, Featured } = design;
+    return (
+      (!designType || designType === DesignType) &&
+      (!subcategoriesArray ||
+        matchDesignSubcategories(design, subcategoriesArray)) &&
+      (!onlyFeatured || (onlyFeatured && Featured)) &&
+      (!keywordsArray || matchDesignKeywords(design, keywordsArray))
+    );
+  });
 }
 
-function matchDesignKeywords(design: TempDesign, keywordsArray?: string[]) {
-  const lowerCaseName = design.Name.toLocaleLowerCase();
-  const loweCaseDescription = design.Name.toLocaleLowerCase();
+function matchDesignKeywords(design: TempDesign, keywordsArray: string[]) {
+  const { Name, Description, Tag1, Tag2, Tag3, Tag4, Tag5 } = design;
+  const lowerCaseName = Name.toLocaleLowerCase();
+  const lowerCaseDescription = Description?.toLocaleLowerCase();
+  const lowerCaseTags = [Tag1, Tag2, Tag3, Tag4, Tag5].map((tag) =>
+    tag?.toLocaleLowerCase()
+  );
 
-  return keywordsArray?.some((keyword) => {
+  return keywordsArray.some((keyword) => {
     const lowerCaseKeyword = keyword.toLocaleLowerCase();
     return (
       lowerCaseName.includes(lowerCaseKeyword) ||
-      loweCaseDescription.includes(lowerCaseKeyword)
+      lowerCaseDescription?.includes(lowerCaseKeyword) ||
+      lowerCaseTags.includes(lowerCaseKeyword)
     );
   });
 }
 
 function matchDesignSubcategories(
   design: TempDesign,
-  querySubcategoriesArray?: string[]
+  querySubcategoriesArray: string[]
 ) {
   const {
     Subcategory1,
@@ -53,7 +49,7 @@ function matchDesignSubcategories(
     Subcategory4,
     Subcategory5,
   } = design;
-  const lowerCaseQuerySubcategories = querySubcategoriesArray?.map(
+  const lowerCaseQuerySubcategories = querySubcategoriesArray.map(
     (subcategory) => subcategory.toLocaleLowerCase()
   );
 
@@ -64,13 +60,19 @@ function matchDesignSubcategories(
     Subcategory4,
     Subcategory5,
   ].some((subcategory) => {
-    const withoutParentCategory = subcategory && subcategory.split(" > ")[1];
-    const withHyphens =
-      withoutParentCategory && withoutParentCategory.replace(" ", "-");
+    const withoutParentCategory = subcategory?.split(" > ")[1];
     return (
-      withHyphens &&
-      lowerCaseQuerySubcategories?.includes(withHyphens.toLocaleLowerCase())
+      withoutParentCategory &&
+      lowerCaseQuerySubcategories.includes(
+        withoutParentCategory?.toLocaleLowerCase()
+      )
     );
+    // const withHyphens =
+    //   withoutParentCategory && withoutParentCategory.replace(" ", "-");
+    // return (
+    //   withHyphens &&
+    //   lowerCaseQuerySubcategories?.includes(withHyphens.toLocaleLowerCase())
+    // );
   });
 }
 
