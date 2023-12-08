@@ -19,7 +19,11 @@ describe("Correctly filter the sample data with various parameters", () => {
       undefined,
       "Screen Print"
     );
-    checkResults(designs, filteredDesigns, [0, 3, 4, 5]);
+    checkResults(
+      designs,
+      filteredDesigns,
+      [0, 3, 4, 5, 8, 9, 10, 11, 12, 13, 14]
+    );
   });
 
   it("should return only embroidery designs when embroidery is the design type", () => {
@@ -80,7 +84,7 @@ describe("Correctly filter the sample data with various parameters", () => {
       undefined,
       "Screen Print"
     );
-    checkResults(designs, filteredDesigns, [3, 4, 5]);
+    checkResults(designs, filteredDesigns, [3, 4, 5, 8]);
   });
 
   it("should only return the single screen print design that contains the keyword 'Tough' and is in the 'Staff Favorites' subcategory", () => {
@@ -116,7 +120,7 @@ describe("Correctly filter the sample data with various parameters", () => {
   it("should only return designs that contain the keyword 'elit' OR the keyword 'Embossed'", () => {
     const designs = getDesigns(true);
     const filteredDesigns = filterDesigns(designs, ["elit", "Embossed"]);
-    checkResults(designs, filteredDesigns, [0, 1, 3, 6]);
+    checkResults(designs, filteredDesigns, [0, 1, 3, 6, 8, 12, 14]);
   });
 
   it("should find 0 screen print designs that contain the keyword 'Embossed'", () => {
