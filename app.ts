@@ -112,18 +112,22 @@ app.get("/designs/:designNumber?", async (req, res) => {
       onlyFeatured
     );
 
-    const status = filteredDesigns.length === 0 ? NOT_FOUND : OK;
-
     const paginated = getPageOfArray(
       filteredDesigns,
       pageNumberToUse,
       amountPerPage
     );
+    const status = paginated.length === 0 ? NOT_FOUND : OK;
     const withImageLinks = await populateDesignImageURLs(
       paginated,
       dropboxCredentials
     );
-    res.status(status).send(withImageLinks);
+    res.status(status).send({
+      pageNumber: pageNumberToUse,
+      perPage: amountPerPage,
+      total: filteredDesigns.length,
+      designs: withImageLinks,
+    });
   } catch (error) {
     if (error instanceof Error)
       return res.status(INTERNAL_SERVER_ERROR).send(message(error.message));
