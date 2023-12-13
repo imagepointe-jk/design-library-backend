@@ -30,6 +30,8 @@ async function updateDropboxAccessToken({
     console.error(
       `Received a ${result.status} error while trying to get a Dropbox access token`
     );
+    const json = await result.json();
+    console.error(json);
     throw new Error(errorMessages.serverError);
   }
 
