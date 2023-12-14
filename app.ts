@@ -26,6 +26,7 @@ const isDevMode = app.get("env") === "development";
 
 const allowedOrigins = [
   "https://react-frontend-production-93c4.up.railway.app",
+  "https://react-frontend-development-31c4.up.railway.app",
 ];
 app.use((req, res, next) => {
   const origin = req.headers.origin;
