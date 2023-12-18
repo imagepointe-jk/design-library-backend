@@ -8,3 +8,10 @@ export type ServerOperationResult = {
   status: number;
   error?: string;
 };
+
+export type SimpleStringCache = {
+  [key: string]: {
+    time: number;
+    value: string;
+  };
+};

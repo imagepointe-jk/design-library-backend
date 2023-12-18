@@ -29,3 +29,7 @@ export function makeStringTitleCase(str: string) {
     .map((word) => `${word[0].toUpperCase()}${word.substring(1)}`)
     .join(" ");
 }
+
+export function minutesToMilliseconds(minutes: number) {
+  return minutes * 60 * 1000;
+}

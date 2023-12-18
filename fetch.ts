@@ -1,9 +1,12 @@
 import { errorMessages } from "./constants";
 import { NOT_AUTHENTICATED, OK } from "./statusCodes";
-import { DropboxCredentials } from "./types";
+import { DropboxCredentials, SimpleStringCache } from "./types";
+import { minutesToMilliseconds } from "./utility";
 
 let accessToken: string | undefined = undefined;
 const apiURL = "https://api.dropboxapi.com";
+const dropboxUrlCache: SimpleStringCache = {};
+const maxCacheAgeInMinutes = 30;
 
 async function updateDropboxAccessToken({
   appKey,
@@ -43,6 +46,12 @@ export async function getDropboxFileURL(
   filePath: string,
   credentials: DropboxCredentials
 ): Promise<string> {
+  const cached = dropboxUrlCache[filePath];
+  const cachedAge = cached ? Date.now() - cached.time : 0;
+  if (cached && cachedAge < minutesToMilliseconds(maxCacheAgeInMinutes)) {
+    return cached.value;
+  }
+
   if (!accessToken) await updateDropboxAccessToken(credentials);
 
   const headers = new Headers();
@@ -91,5 +100,9 @@ export async function getDropboxFileURL(
     throw new Error(errorMessages.serverError);
   }
 
+  dropboxUrlCache[filePath] = {
+    time: Date.now(),
+    value: json.link,
+  };
   return json.link;
 }
