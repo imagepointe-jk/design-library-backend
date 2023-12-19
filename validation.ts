@@ -1,5 +1,6 @@
 import {
   designTypeSchema,
+  tempCategorySchema,
   tempDbSchema,
   tempDesignSchema,
   tempSubcategorySchema,
@@ -22,6 +23,12 @@ export function parseDesign(json: any) {
   return tempDesignSchema.parse(json);
 }
 
+function parseCategory(json: any) {
+  json.DesignType = json["Design Type"];
+
+  return tempCategorySchema.parse(json);
+}
+
 function parseSubcategory(json: any) {
   json.ParentCategory = json["Parent Category"];
 
@@ -30,12 +37,16 @@ function parseSubcategory(json: any) {
 
 export function parseTempDb(json: any) {
   const parsedDesigns = json.Designs.map((design: any) => parseDesign(design));
+  const parsedCategories = json.Categories.map((category: any) =>
+    parseCategory(category)
+  );
   const parsedSubcategories = json.Subcategories.map((subcategory: any) =>
     parseSubcategory(subcategory)
   );
 
   json.Designs = parsedDesigns;
   json.Subcategories = parsedSubcategories;
+  json.Categories = parsedCategories;
 
   return tempDbSchema.parse(json);
 }

@@ -34,6 +34,11 @@ export const tempDesignWithImagesSchema = z.intersection(
   z.object({ ImageURLs: z.array(z.string()) })
 );
 
+export const tempCategorySchema = z.object({
+  Name: z.string(),
+  DesignType: z.string(),
+});
+
 export const tempSubcategorySchema = z.object({
   Name: z.string(),
   ParentCategory: z.string(),
@@ -43,7 +48,7 @@ export const tempSubcategorySchema = z.object({
 export const tempDbSchema = z.object({
   Designs: z.array(tempDesignSchema),
   Tags: z.array(z.object({ Name: z.string() })),
-  Categories: z.array(z.object({ Name: z.string() })),
+  Categories: z.array(tempCategorySchema),
   Subcategories: z.array(tempSubcategorySchema),
 });
 
