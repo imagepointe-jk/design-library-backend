@@ -68,10 +68,8 @@ app.get("/designs/:designNumber?", async (req, res) => {
     designtype: designTypeQuery,
     featured,
   } = req.query;
-  const { designNumber: designNumberStr } = req.params;
+  const { designNumber } = req.params;
 
-  const designNumber =
-    designNumberStr && !isNaN(+designNumberStr) ? +designNumberStr : undefined;
   const subcategoriesArray = trySplitCommaSeparatedString(subcategories);
   const keywordsArray = trySplitCommaSeparatedString(keywords);
   const tagsArray = trySplitCommaSeparatedString(tags);
@@ -84,21 +82,21 @@ app.get("/designs/:designNumber?", async (req, res) => {
   const pageNumberToUse = pageNumber !== undefined ? +pageNumber : 1;
 
   try {
-    const designs = getDesigns(isDevMode);
+    const designs = await getDesigns(dropboxCredentials, isDevMode);
     if (!designs) {
       throw new Error(errorMessages.serverError);
     }
 
     if (designNumber !== undefined) {
-      const designWithId = designs.find(
+      const designWithDesignNumber = designs.find(
         (design) => design.DesignNumber === designNumber
       );
-      if (!designWithId)
+      if (!designWithDesignNumber)
         return res
           .status(404)
           .send(message(`Design ${designNumber} not found.`));
       const designWithImage = await populateSingleDesignImageURLs(
-        designWithId,
+        designWithDesignNumber,
         dropboxCredentials
       );
       return res.status(OK).send(designWithImage);
@@ -136,24 +134,24 @@ app.get("/designs/:designNumber?", async (req, res) => {
   }
 });
 
-app.get("/categories", (req, res) => {
-  const categories = getCategories(isDevMode);
+app.get("/categories", async (req, res) => {
+  const categories = await getCategories(dropboxCredentials, isDevMode);
   if (!categories)
     res.status(INTERNAL_SERVER_ERROR).send(message(errorMessages.serverError));
 
   res.status(OK).send(categories);
 });
 
-app.get("/subcategories", (req, res) => {
-  const subcategories = getSubcategories(isDevMode);
+app.get("/subcategories", async (req, res) => {
+  const subcategories = await getSubcategories(dropboxCredentials, isDevMode);
   if (!subcategories)
     res.status(INTERNAL_SERVER_ERROR).send(message(errorMessages.serverError));
 
   res.status(OK).send(subcategories);
 });
 
-app.get("/tags", (req, res) => {
-  const tags = getTags(isDevMode);
+app.get("/tags", async (req, res) => {
+  const tags = await getTags(dropboxCredentials, isDevMode);
   if (!tags)
     res.status(INTERNAL_SERVER_ERROR).send(message(errorMessages.serverError));
 

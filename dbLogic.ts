@@ -1,7 +1,7 @@
 import fs from "fs";
 import xlsx from "xlsx";
 import { errorMessages } from "./constants";
-import { getDropboxFileURL } from "./fetch";
+import { downloadTempDb, getDropboxFileURL } from "./fetch";
 import { TempDesign, TempDesignWithImages } from "./tempDbSchema";
 import { DropboxCredentials } from "./types";
 import { parseTempDb } from "./validation";
@@ -9,13 +9,16 @@ import { isSettledPromiseFulfilled } from "./utility";
 
 //? A spreadsheet is being used as a temporary pseudo-database.
 //? Use XLSX to read in the entire DB and store it as JSON.
-function getTempDb(isDevMode: boolean) {
+async function getTempDb(
+  dropboxCredentials: DropboxCredentials,
+  isDevMode: boolean
+) {
   if (!isDevMode)
     console.warn(
       "======WARNING: Reading from the sample database while not running in development environment!"
     );
   try {
-    const file = fs.readFileSync("./samples/sampleTempDb.xlsx");
+    const file = await downloadTempDb(dropboxCredentials);
     const workbook = xlsx.read(file, { type: "buffer" });
     const data: any = {};
     for (const sheetName of workbook.SheetNames) {
@@ -31,8 +34,11 @@ function getTempDb(isDevMode: boolean) {
   }
 }
 
-export function getDesigns(isDevMode: boolean): TempDesign[] {
-  const db = getTempDb(isDevMode);
+export async function getDesigns(
+  dropboxCredentials: DropboxCredentials,
+  isDevMode: boolean
+): Promise<TempDesign[]> {
+  const db = await getTempDb(dropboxCredentials, isDevMode);
   if (!db) {
     console.error("Could not reach database");
     throw new Error(errorMessages.serverError);
@@ -40,29 +46,42 @@ export function getDesigns(isDevMode: boolean): TempDesign[] {
   return db.Designs;
 }
 
-export function getCategories(isDevMode: boolean) {
-  const db = getTempDb(isDevMode);
+export async function getCategories(
+  dropboxCredentials: DropboxCredentials,
+  isDevMode: boolean
+) {
+  const db = await getTempDb(dropboxCredentials, isDevMode);
   if (!db) return undefined;
 
   return db.Categories;
 }
 
-export function getSubcategories(isDevMode: boolean) {
-  const db = getTempDb(isDevMode);
+export async function getSubcategories(
+  dropboxCredentials: DropboxCredentials,
+  isDevMode: boolean
+) {
+  const db = await getTempDb(dropboxCredentials, isDevMode);
   if (!db) return undefined;
 
   return db.Subcategories;
 }
 
-export function getTags(isDevMode: boolean) {
-  const db = getTempDb(isDevMode);
+export async function getTags(
+  dropboxCredentials: DropboxCredentials,
+  isDevMode: boolean
+) {
+  const db = await getTempDb(dropboxCredentials, isDevMode);
   if (!db) return undefined;
 
   return db.Tags;
 }
 
-export async function findDesign(name: string, isDevMode: boolean) {
-  const designs = getDesigns(isDevMode);
+export async function findDesign(
+  dropboxCredentials: DropboxCredentials,
+  name: string,
+  isDevMode: boolean
+) {
+  const designs = await getDesigns(dropboxCredentials, isDevMode);
   if (!designs) return undefined;
 
   const result = designs.find((design) => design.Name === name);
@@ -71,9 +90,10 @@ export async function findDesign(name: string, isDevMode: boolean) {
 
 export async function findDesignsInSubcategory(
   subcategory: string,
+  dropboxCredentials: DropboxCredentials,
   isDevMode: boolean
 ) {
-  const designs = getDesigns(isDevMode);
+  const designs = await getDesigns(dropboxCredentials, isDevMode);
   if (!designs) return undefined;
 
   const result = designs.filter((design) => {
@@ -147,20 +167,4 @@ export async function populateDesignImageURLs(
   });
 
   return designsWithURLs;
-  // const requests = designs.map((design) =>
-  //   getDropboxFileURL(design.DropboxImagePath, dropboxCredentials)
-  // );
-  // const results = await Promise.allSettled(requests);
-  // const designsWithImages: TempDesignWithImage[] = designs.map((design, i) => {
-  //   const linkResult = results[i];
-  //   const ImageURL = isSettledPromiseFulfilled(linkResult)
-  //     ? linkResult.value
-  //     : "";
-  //   return {
-  //     ...design,
-  //     ImageURL,
-  //   };
-  // });
-
-  // return designsWithImages;
 }

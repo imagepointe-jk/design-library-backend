@@ -1,4 +1,5 @@
 import {
+  DesignType,
   designTypeSchema,
   tempCategorySchema,
   tempDbSchema,
@@ -6,10 +7,10 @@ import {
   tempSubcategorySchema,
 } from "./tempDbSchema";
 
-export function parseDesign(json: any) {
+export function parseDesign(json: any, type: DesignType) {
   json.DefaultBackgroundColor = json["Default Background Color"];
-  json.DesignType = json["Design Type"];
-  json.DesignNumber = json["Design Number"];
+  json.DesignType = type;
+  json.DesignNumber = `${json["Design Number"]}`;
   json.Featured = json.Featured === "Yes" ? true : false;
 
   json.DropboxImagePath1 = json["Dropbox Image Path 1"];
@@ -36,7 +37,12 @@ function parseSubcategory(json: any) {
 }
 
 export function parseTempDb(json: any) {
-  const parsedDesigns = json.Designs.map((design: any) => parseDesign(design));
+  const parsedScreenPrintDesigns = json["Screen Print Designs"].map(
+    (design: any) => parseDesign(design, "Screen Print")
+  );
+  const parsedEmbroideryDesigns = json["Embroidery Designs"].map(
+    (design: any) => parseDesign(design, "Embroidery")
+  );
   const parsedCategories = json.Categories.map((category: any) =>
     parseCategory(category)
   );
@@ -44,7 +50,7 @@ export function parseTempDb(json: any) {
     parseSubcategory(subcategory)
   );
 
-  json.Designs = parsedDesigns;
+  json.Designs = parsedScreenPrintDesigns.concat(parsedEmbroideryDesigns);
   json.Subcategories = parsedSubcategories;
   json.Categories = parsedCategories;
 

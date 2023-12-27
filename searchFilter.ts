@@ -22,7 +22,7 @@ export function filterDesigns(
 
 function matchDesignKeywords(design: TempDesign, keywordsArray: string[]) {
   const { Name, Description, Tag1, Tag2, Tag3, Tag4, Tag5 } = design;
-  const lowerCaseName = Name.toLocaleLowerCase();
+  const lowerCaseName = Name ? Name.toLocaleLowerCase() : "";
   const lowerCaseDescription = Description?.toLocaleLowerCase();
   const lowerCaseTags = [Tag1, Tag2, Tag3, Tag4, Tag5].map((tag) =>
     tag?.toLocaleLowerCase()
@@ -67,12 +67,6 @@ function matchDesignSubcategories(
         withoutParentCategory?.toLocaleLowerCase()
       )
     );
-    // const withHyphens =
-    //   withoutParentCategory && withoutParentCategory.replace(" ", "-");
-    // return (
-    //   withHyphens &&
-    //   lowerCaseQuerySubcategories?.includes(withHyphens.toLocaleLowerCase())
-    // );
   });
 }
 

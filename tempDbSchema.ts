@@ -4,10 +4,10 @@ export const designTypes = ["Screen Print", "Embroidery"] as const;
 export const designTypeSchema = z.enum(designTypes);
 
 export const tempDesignSchema = z.object({
-  Name: z.string(),
+  Name: z.string().optional(),
   Description: z.string().optional(),
   DefaultBackgroundColor: z.string(),
-  Subcategory1: z.string(),
+  Subcategory1: z.string().optional(),
   Subcategory2: z.string().optional(),
   Subcategory3: z.string().optional(),
   Subcategory4: z.string().optional(),
@@ -25,7 +25,7 @@ export const tempDesignSchema = z.object({
   DropboxImagePath5: z.string().optional(),
   DropboxImagePath6: z.string().optional(),
   DropboxImagePath7: z.string().optional(),
-  DesignNumber: z.number(),
+  DesignNumber: z.string(),
   Featured: z.boolean(),
 });
 
