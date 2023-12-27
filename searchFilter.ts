@@ -86,3 +86,10 @@ function matchDesignTags(design: TempDesign, queryTagsArray?: string[]) {
     (subcategory) => subcategory && lowerCaseQueryTags?.includes(subcategory)
   );
 }
+
+export function sortDesigns(designs: TempDesign[]) {
+  designs.sort((design1, design2) => {
+    if (design1.Featured) return -1;
+    return 1;
+  });
+}

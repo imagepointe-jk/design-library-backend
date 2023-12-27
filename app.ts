@@ -8,7 +8,7 @@ import {
   populateDesignImageURLs,
   populateSingleDesignImageURLs,
 } from "./dbLogic";
-import { filterDesigns } from "./searchFilter";
+import { filterDesigns, sortDesigns } from "./searchFilter";
 import { INTERNAL_SERVER_ERROR, NOT_FOUND, OK } from "./statusCodes";
 import { DropboxCredentials } from "./types";
 import {
@@ -112,6 +112,7 @@ app.get("/designs/:designNumber?", async (req, res) => {
       designType,
       onlyFeatured
     );
+    sortDesigns(filteredDesigns);
 
     const paginated = getPageOfArray(
       filteredDesigns,
