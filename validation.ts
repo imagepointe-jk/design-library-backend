@@ -7,7 +7,8 @@ import {
   tempSubcategorySchema,
 } from "./tempDbSchema";
 
-export function parseDesign(json: any, type: DesignType) {
+export function parseDesign(json: any, type: DesignType, index: number) {
+  json.Id = index; //TEMPORARY SOLUTION for each design having a unique ID.
   json.DefaultBackgroundColor = json["Default Background Color"];
   json.DesignType = type;
   json.DesignNumber = `${json["Design Number"]}`;
@@ -37,11 +38,13 @@ function parseSubcategory(json: any) {
 }
 
 export function parseTempDb(json: any) {
-  const parsedScreenPrintDesigns = json["Screen Print Designs"].map(
-    (design: any) => parseDesign(design, "Screen Print")
+  const screenPrintDesigns: any[] = json["Screen Print Designs"];
+  const embroideryDesigns: any[] = json["Embroidery Designs"];
+  const parsedScreenPrintDesigns = screenPrintDesigns.map((design, i) =>
+    parseDesign(design, "Screen Print", i)
   );
-  const parsedEmbroideryDesigns = json["Embroidery Designs"].map(
-    (design: any) => parseDesign(design, "Embroidery")
+  const parsedEmbroideryDesigns = embroideryDesigns.map((design, i) =>
+    parseDesign(design, "Embroidery", i + screenPrintDesigns.length)
   );
   const parsedCategories = json.Categories.map((category: any) =>
     parseCategory(category)

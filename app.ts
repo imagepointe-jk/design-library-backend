@@ -58,7 +58,7 @@ const dropboxCredentials: DropboxCredentials = {
 };
 // #endregion
 
-app.get("/designs/:designNumber?", async (req, res) => {
+app.get("/designs/:designId?", async (req, res) => {
   const {
     subcategories,
     keywords,
@@ -69,7 +69,7 @@ app.get("/designs/:designNumber?", async (req, res) => {
     featured,
     allowDuplicateDesignNumbers,
   } = req.query;
-  const { designNumber } = req.params;
+  const { designId } = req.params;
 
   const subcategoriesArray = trySplitCommaSeparatedString(subcategories);
   const keywordsArray = trySplitCommaSeparatedString(keywords);
@@ -89,16 +89,14 @@ app.get("/designs/:designNumber?", async (req, res) => {
       throw new Error(errorMessages.serverError);
     }
 
-    if (designNumber !== undefined) {
-      const designWithDesignNumber = designs.find(
-        (design) => design.DesignNumber === designNumber
+    if (designId !== undefined && !isNaN(+designId)) {
+      const designWithDesignId = designs.find(
+        (design) => design.Id === +designId
       );
-      if (!designWithDesignNumber)
-        return res
-          .status(404)
-          .send(message(`Design ${designNumber} not found.`));
+      if (!designWithDesignId)
+        return res.status(404).send(message(`Design ${designId} not found.`));
       const designWithImage = await populateSingleDesignImageURLs(
-        designWithDesignNumber,
+        designWithDesignId,
         dropboxCredentials
       );
       return res.status(OK).send(designWithImage);

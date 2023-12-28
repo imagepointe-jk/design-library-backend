@@ -4,6 +4,7 @@ export const designTypes = ["Screen Print", "Embroidery"] as const;
 export const designTypeSchema = z.enum(designTypes);
 
 export const tempDesignSchema = z.object({
+  Id: z.number(),
   Name: z.string().optional(),
   Description: z.string().optional(),
   DefaultBackgroundColor: z.string(),
