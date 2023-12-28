@@ -12,6 +12,7 @@ export function filterDesigns(
   return designs.filter((design, i, arr) => {
     const { DesignType, Featured, DesignNumber } = design;
     return (
+      DesignNumber !== `${undefined}` &&
       (allowDuplicateDesignNumbers ||
         (i > 0 && arr[i - 1].DesignNumber !== DesignNumber)) &&
       (!designType || designType === DesignType) &&
