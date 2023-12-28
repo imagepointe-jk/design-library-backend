@@ -6,11 +6,14 @@ export function filterDesigns(
   subcategoriesArray?: string[],
   tagsArray?: string[],
   designType?: DesignType,
-  onlyFeatured?: boolean
+  onlyFeatured?: boolean,
+  allowDuplicateDesignNumbers?: boolean
 ) {
-  return designs.filter((design) => {
-    const { DesignType, Featured } = design;
+  return designs.filter((design, i, arr) => {
+    const { DesignType, Featured, DesignNumber } = design;
     return (
+      (allowDuplicateDesignNumbers ||
+        (i > 0 && arr[i - 1].DesignNumber !== DesignNumber)) &&
       (!designType || designType === DesignType) &&
       (!subcategoriesArray ||
         matchDesignSubcategories(design, subcategoriesArray)) &&
@@ -21,19 +24,22 @@ export function filterDesigns(
 }
 
 function matchDesignKeywords(design: TempDesign, keywordsArray: string[]) {
-  const { Name, Description, Tag1, Tag2, Tag3, Tag4, Tag5 } = design;
+  const { Name, Description, Tag1, Tag2, Tag3, Tag4, Tag5, DesignNumber } =
+    design;
   const lowerCaseName = Name ? Name.toLocaleLowerCase() : "";
   const lowerCaseDescription = Description?.toLocaleLowerCase();
   const lowerCaseTags = [Tag1, Tag2, Tag3, Tag4, Tag5].map((tag) =>
     tag?.toLocaleLowerCase()
   );
+  const lowerCaseDesignNumber = DesignNumber.toLocaleLowerCase();
 
   return keywordsArray.some((keyword) => {
     const lowerCaseKeyword = keyword.toLocaleLowerCase();
     return (
       lowerCaseName.includes(lowerCaseKeyword) ||
       lowerCaseDescription?.includes(lowerCaseKeyword) ||
-      lowerCaseTags.includes(lowerCaseKeyword)
+      lowerCaseTags.includes(lowerCaseKeyword) ||
+      lowerCaseDesignNumber.includes(lowerCaseKeyword)
     );
   });
 }

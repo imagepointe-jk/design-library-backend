@@ -67,6 +67,7 @@ app.get("/designs/:designNumber?", async (req, res) => {
     pageNumber,
     designtype: designTypeQuery,
     featured,
+    allowDuplicateDesignNumbers,
   } = req.query;
   const { designNumber } = req.params;
 
@@ -80,6 +81,7 @@ app.get("/designs/:designNumber?", async (req, res) => {
   const onlyFeatured = `${featured}` === `${true}`;
   const amountPerPage = perPage !== undefined ? +perPage : defaultCountPerPage;
   const pageNumberToUse = pageNumber !== undefined ? +pageNumber : 1;
+  const allowDuplicates = `${allowDuplicateDesignNumbers}` === `${true}`;
 
   try {
     const designs = await getDesigns(dropboxCredentials, isDevMode);
@@ -108,7 +110,8 @@ app.get("/designs/:designNumber?", async (req, res) => {
       subcategoriesArray,
       tagsArray,
       designType,
-      onlyFeatured
+      onlyFeatured,
+      allowDuplicates
     );
     sortDesigns(filteredDesigns);
 
