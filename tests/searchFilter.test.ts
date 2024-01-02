@@ -13,7 +13,7 @@ const dropboxCredentials: DropboxCredentials = {
 };
 
 describe("Correctly filter the sample data with various parameters", () => {
-  it("should return all designs when no filters are provided", async () => {
+  it("should return all PUBLISHED designs when no filters are provided", async () => {
     const designs = await getDesigns(dropboxCredentials, true);
     const filteredDesigns = filterDesigns(
       designs,
@@ -24,8 +24,10 @@ describe("Correctly filter the sample data with various parameters", () => {
       undefined,
       true
     );
-    const allDesignNumbers = designs.map((design) => +design.DesignNumber);
-    checkResults(designs, filteredDesigns, allDesignNumbers);
+    const publishedDesignNumbers = designs
+      .filter((design) => design.Status !== "Draft")
+      .map((design) => +design.DesignNumber);
+    checkResults(designs, filteredDesigns, publishedDesignNumbers);
   });
 
   it("should return only screen print designs when screen print is the design type", async () => {

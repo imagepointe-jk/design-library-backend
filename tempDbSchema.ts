@@ -3,6 +3,9 @@ import { z } from "zod";
 export const designTypes = ["Screen Print", "Embroidery"] as const;
 export const designTypeSchema = z.enum(designTypes);
 
+const designStatuses = ["Published", "Draft"] as const;
+const designStatusSchema = z.enum(designStatuses);
+
 export const tempDesignSchema = z.object({
   Id: z.number(),
   Name: z.string().optional(),
@@ -28,6 +31,7 @@ export const tempDesignSchema = z.object({
   DropboxImagePath7: z.string().optional(),
   DesignNumber: z.string(),
   Featured: z.boolean(),
+  Status: designStatusSchema,
 });
 
 export const tempDesignWithImagesSchema = z.intersection(

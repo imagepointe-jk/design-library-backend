@@ -10,8 +10,9 @@ export function filterDesigns(
   allowDuplicateDesignNumbers?: boolean
 ) {
   return designs.filter((design, i, arr) => {
-    const { DesignType, Featured, DesignNumber } = design;
+    const { DesignType, Featured, DesignNumber, Status } = design;
     return (
+      Status !== "Draft" &&
       DesignNumber !== `${undefined}` &&
       (allowDuplicateDesignNumbers ||
         i === 0 ||
