@@ -16,8 +16,8 @@ describe("Correctly filter the sample data with various parameters", () => {
   it("should return all designs when no filters are provided", async () => {
     const designs = await getDesigns(dropboxCredentials, true);
     const filteredDesigns = filterDesigns(designs);
-    const allDesignIndices = designs.map((_, i) => i);
-    checkResults(designs, filteredDesigns, allDesignIndices);
+    const allDesignNumbers = designs.map((design) => +design.DesignNumber);
+    checkResults(designs, filteredDesigns, allDesignNumbers);
   });
 
   it("should return only screen print designs when screen print is the design type", async () => {
@@ -32,7 +32,7 @@ describe("Correctly filter the sample data with various parameters", () => {
     checkResults(
       designs,
       filteredDesigns,
-      [0, 3, 4, 5, 8, 9, 10, 11, 12, 13, 14]
+      [1025, 1003, 1, 11, 1012, 1013, 1014, 1015, 1016, 1017, 1018]
     );
   });
 
@@ -45,7 +45,7 @@ describe("Correctly filter the sample data with various parameters", () => {
       undefined,
       "Embroidery"
     );
-    checkResults(designs, filteredDesigns, [1, 2, 6, 7]);
+    checkResults(designs, filteredDesigns, [1009, 1006, 1000, 1001]);
   });
 
   it("should only return embroidery designs in the Classics subcategory", async () => {
@@ -57,7 +57,7 @@ describe("Correctly filter the sample data with various parameters", () => {
       undefined,
       "Embroidery"
     );
-    checkResults(designs, filteredDesigns, [2, 6]);
+    checkResults(designs, filteredDesigns, [1006, 1000]);
   });
 
   it("should only return the single design that is screen print and in the Best Sellers subcategory", async () => {
@@ -69,7 +69,7 @@ describe("Correctly filter the sample data with various parameters", () => {
       undefined,
       "Screen Print"
     );
-    checkResults(designs, filteredDesigns, [0]);
+    checkResults(designs, filteredDesigns, [1025]);
   });
 
   it("should only return featured embroidery designs", async () => {
@@ -82,7 +82,7 @@ describe("Correctly filter the sample data with various parameters", () => {
       "Embroidery",
       true
     );
-    checkResults(designs, filteredDesigns, [1, 2]);
+    checkResults(designs, filteredDesigns, [1009, 1006]);
   });
 
   it("should only return screen print designs that contain the keyword 'Tough'", async () => {
@@ -94,7 +94,7 @@ describe("Correctly filter the sample data with various parameters", () => {
       undefined,
       "Screen Print"
     );
-    checkResults(designs, filteredDesigns, [3, 4, 5, 8]);
+    checkResults(designs, filteredDesigns, [1003, 1, 11, 1012]);
   });
 
   it("should only return the single screen print design that contains the keyword 'Tough' and is in the 'Staff Favorites' subcategory", async () => {
@@ -106,7 +106,7 @@ describe("Correctly filter the sample data with various parameters", () => {
       undefined,
       "Screen Print"
     );
-    checkResults(designs, filteredDesigns, [5]);
+    checkResults(designs, filteredDesigns, [11]);
   });
 
   it("should only return embroidery designs that contain the keyword 'Tough' OR the keyword 'Bold'", async () => {
@@ -118,19 +118,23 @@ describe("Correctly filter the sample data with various parameters", () => {
       undefined,
       "Embroidery"
     );
-    checkResults(designs, filteredDesigns, [1, 2]);
+    checkResults(designs, filteredDesigns, [1006, 1009]);
   });
 
   it("should return the single design that contains the keyword 'Gold' OR the keyword 'Embossed'", async () => {
     const designs = await getDesigns(dropboxCredentials, true);
     const filteredDesigns = filterDesigns(designs, ["Gold", "Embossed"]);
-    checkResults(designs, filteredDesigns, [1]);
+    checkResults(designs, filteredDesigns, [1009]);
   });
 
   it("should only return designs that contain the keyword 'elit' OR the keyword 'Embossed'", async () => {
     const designs = await getDesigns(dropboxCredentials, true);
     const filteredDesigns = filterDesigns(designs, ["elit", "Embossed"]);
-    checkResults(designs, filteredDesigns, [0, 1, 3, 6, 8, 12, 14]);
+    checkResults(
+      designs,
+      filteredDesigns,
+      [1009, 1000, 1025, 1003, 1012, 1016, 1018]
+    );
   });
 
   it("should find 0 screen print designs that contain the keyword 'Embossed'", async () => {
@@ -149,10 +153,13 @@ describe("Correctly filter the sample data with various parameters", () => {
 function checkResults(
   allDesigns: TempDesign[],
   filteredDesigns: TempDesign[],
-  expectedDesignIndices: number[]
+  expectedDesignNumbers: number[]
 ) {
-  expect(filteredDesigns.length).toBe(expectedDesignIndices.length);
-  for (const i of expectedDesignIndices) {
-    expect(filteredDesigns).toContainEqual(allDesigns[i]);
+  expect(filteredDesigns.length).toBe(expectedDesignNumbers.length);
+  const filteredDesignNumbers = filteredDesigns.map(
+    (design) => +design.DesignNumber
+  );
+  for (const designNumber of expectedDesignNumbers) {
+    expect(filteredDesignNumbers).toContain(designNumber);
   }
 }

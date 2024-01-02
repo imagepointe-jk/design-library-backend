@@ -14,6 +14,7 @@ export function filterDesigns(
     return (
       DesignNumber !== `${undefined}` &&
       (allowDuplicateDesignNumbers ||
+        i === 0 ||
         (i > 0 && arr[i - 1].DesignNumber !== DesignNumber)) &&
       (!designType || designType === DesignType) &&
       (!subcategoriesArray ||

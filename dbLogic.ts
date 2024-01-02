@@ -18,7 +18,9 @@ async function getTempDb(
       "======WARNING: Reading from the sample database while not running in development environment!"
     );
   try {
-    const file = await downloadTempDb(dropboxCredentials);
+    const file = isDevMode
+      ? fs.readFileSync("./samples/sampleTempDb.xlsx")
+      : await downloadTempDb(dropboxCredentials);
     const workbook = xlsx.read(file, { type: "buffer" });
     const data: any = {};
     for (const sheetName of workbook.SheetNames) {
