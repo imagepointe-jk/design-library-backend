@@ -15,7 +15,15 @@ const dropboxCredentials: DropboxCredentials = {
 describe("Correctly filter the sample data with various parameters", () => {
   it("should return all designs when no filters are provided", async () => {
     const designs = await getDesigns(dropboxCredentials, true);
-    const filteredDesigns = filterDesigns(designs);
+    const filteredDesigns = filterDesigns(
+      designs,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      true
+    );
     const allDesignNumbers = designs.map((design) => +design.DesignNumber);
     checkResults(designs, filteredDesigns, allDesignNumbers);
   });
@@ -45,7 +53,7 @@ describe("Correctly filter the sample data with various parameters", () => {
       undefined,
       "Embroidery"
     );
-    checkResults(designs, filteredDesigns, [1009, 1006, 1000, 1001]);
+    checkResults(designs, filteredDesigns, [1009, 1006, 1000, 1001, 205]);
   });
 
   it("should only return embroidery designs in the Classics subcategory", async () => {
@@ -82,7 +90,7 @@ describe("Correctly filter the sample data with various parameters", () => {
       "Embroidery",
       true
     );
-    checkResults(designs, filteredDesigns, [1009, 1006]);
+    checkResults(designs, filteredDesigns, [1009, 1006, 205]);
   });
 
   it("should only return screen print designs that contain the keyword 'Tough'", async () => {
@@ -118,7 +126,7 @@ describe("Correctly filter the sample data with various parameters", () => {
       undefined,
       "Embroidery"
     );
-    checkResults(designs, filteredDesigns, [1006, 1009]);
+    checkResults(designs, filteredDesigns, [1006, 1009, 205]);
   });
 
   it("should return the single design that contains the keyword 'Gold' OR the keyword 'Embossed'", async () => {

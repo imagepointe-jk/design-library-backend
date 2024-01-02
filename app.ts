@@ -68,6 +68,7 @@ app.get("/designs/:designId?", async (req, res) => {
     designtype: designTypeQuery,
     featured,
     allowDuplicateDesignNumbers,
+    getRelatedToId, //if an ID was specified, also return any designs with the same design number
   } = req.query;
   const { designId } = req.params;
 
@@ -82,6 +83,7 @@ app.get("/designs/:designId?", async (req, res) => {
   const amountPerPage = perPage !== undefined ? +perPage : defaultCountPerPage;
   const pageNumberToUse = pageNumber !== undefined ? +pageNumber : 1;
   const allowDuplicates = `${allowDuplicateDesignNumbers}` === `${true}`;
+  const getRelated = `${getRelatedToId}` === `${true}`;
 
   try {
     const designs = await getDesigns(dropboxCredentials, isDevMode);
@@ -95,6 +97,16 @@ app.get("/designs/:designId?", async (req, res) => {
       );
       if (!designWithDesignId)
         return res.status(404).send(message(`Design ${designId} not found.`));
+      if (getRelated) {
+        const designsWithSameDesignNumber = designs.filter(
+          (design) => design.DesignNumber === designWithDesignId.DesignNumber
+        );
+        const withImages = await populateDesignImageURLs(
+          designsWithSameDesignNumber,
+          dropboxCredentials
+        );
+        return res.status(OK).send(withImages);
+      }
       const designWithImage = await populateSingleDesignImageURLs(
         designWithDesignId,
         dropboxCredentials
