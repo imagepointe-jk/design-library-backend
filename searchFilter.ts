@@ -3,6 +3,7 @@ import { DesignType, TempDesign } from "./tempDbSchema";
 export function filterDesigns(
   designs: TempDesign[],
   keywordsArray?: string[],
+  category?: string,
   subcategoriesArray?: string[],
   tagsArray?: string[],
   designType?: DesignType,
@@ -18,6 +19,7 @@ export function filterDesigns(
         i === 0 ||
         (i > 0 && arr[i - 1].DesignNumber !== DesignNumber)) &&
       (!designType || designType === DesignType) &&
+      (!category || matchDesignCategories(design, category)) &&
       (!subcategoriesArray ||
         matchDesignSubcategories(design, subcategoriesArray)) &&
       (!onlyFeatured || (onlyFeatured && Featured)) &&
@@ -43,6 +45,38 @@ function matchDesignKeywords(design: TempDesign, keywordsArray: string[]) {
       lowerCaseDescription?.includes(lowerCaseKeyword) ||
       lowerCaseTags.includes(lowerCaseKeyword) ||
       lowerCaseDesignNumber.includes(lowerCaseKeyword)
+    );
+  });
+}
+
+function matchDesignCategories(design: TempDesign, category: string) {
+  const {
+    Subcategory1,
+    Subcategory2,
+    Subcategory3,
+    Subcategory4,
+    Subcategory5,
+  } = design;
+
+  return [
+    Subcategory1,
+    Subcategory2,
+    Subcategory3,
+    Subcategory4,
+    Subcategory5,
+  ].some((subcategory) => {
+    const parentCategory = subcategory?.split(" > ")[0];
+    if (
+      parentCategory &&
+      category.toLocaleLowerCase() === parentCategory?.toLocaleLowerCase()
+    ) {
+      console.log(design.DesignNumber + " DOES match");
+    } else {
+      console.log(design.DesignNumber + " DOES NOT match");
+    }
+    return (
+      parentCategory &&
+      category.toLocaleLowerCase() === parentCategory?.toLocaleLowerCase()
     );
   });
 }

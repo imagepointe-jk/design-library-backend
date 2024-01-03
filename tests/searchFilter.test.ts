@@ -22,6 +22,7 @@ describe("Correctly filter the sample data with various parameters", () => {
       undefined,
       undefined,
       undefined,
+      undefined,
       true
     );
     const publishedDesignNumbers = designs
@@ -34,6 +35,7 @@ describe("Correctly filter the sample data with various parameters", () => {
     const designs = await getDesigns(dropboxCredentials, true);
     const filteredDesigns = filterDesigns(
       designs,
+      undefined,
       undefined,
       undefined,
       undefined,
@@ -53,6 +55,7 @@ describe("Correctly filter the sample data with various parameters", () => {
       undefined,
       undefined,
       undefined,
+      undefined,
       "Embroidery"
     );
     checkResults(designs, filteredDesigns, [1009, 1006, 1000, 1001, 205]);
@@ -62,6 +65,7 @@ describe("Correctly filter the sample data with various parameters", () => {
     const designs = await getDesigns(dropboxCredentials, true);
     const filteredDesigns = filterDesigns(
       designs,
+      undefined,
       undefined,
       ["Classics"],
       undefined,
@@ -75,6 +79,7 @@ describe("Correctly filter the sample data with various parameters", () => {
     const filteredDesigns = filterDesigns(
       designs,
       undefined,
+      undefined,
       ["Best Sellers"],
       undefined,
       "Screen Print"
@@ -86,6 +91,7 @@ describe("Correctly filter the sample data with various parameters", () => {
     const designs = await getDesigns(dropboxCredentials, true);
     const filteredDesigns = filterDesigns(
       designs,
+      undefined,
       undefined,
       undefined,
       undefined,
@@ -102,6 +108,7 @@ describe("Correctly filter the sample data with various parameters", () => {
       ["Tough"],
       undefined,
       undefined,
+      undefined,
       "Screen Print"
     );
     checkResults(designs, filteredDesigns, [1003, 1, 11, 1012]);
@@ -112,6 +119,7 @@ describe("Correctly filter the sample data with various parameters", () => {
     const filteredDesigns = filterDesigns(
       designs,
       ["Tough"],
+      undefined,
       ["Staff Favorites"],
       undefined,
       "Screen Print"
@@ -124,6 +132,7 @@ describe("Correctly filter the sample data with various parameters", () => {
     const filteredDesigns = filterDesigns(
       designs,
       ["Tough", "Bold"],
+      undefined,
       undefined,
       undefined,
       "Embroidery"
@@ -154,9 +163,36 @@ describe("Correctly filter the sample data with various parameters", () => {
       ["Embossed"],
       undefined,
       undefined,
+      undefined,
       "Screen Print"
     );
     checkResults(designs, filteredDesigns, []);
+  });
+
+  it("should return embroidery designs that are in the 'Quick Search' category (regardless of subcategory)", async () => {
+    const designs = await getDesigns(dropboxCredentials, true);
+    const filteredDesigns = filterDesigns(
+      designs,
+      undefined,
+      "Quick Search",
+      undefined,
+      undefined,
+      "Embroidery"
+    );
+    checkResults(designs, filteredDesigns, [1009, 1006, 1000]);
+  });
+
+  it("should return the single screen print designs that is in the 'Holiday' category (regardless of subcategory)", async () => {
+    const designs = await getDesigns(dropboxCredentials, true);
+    const filteredDesigns = filterDesigns(
+      designs,
+      undefined,
+      "Holiday",
+      undefined,
+      undefined,
+      "Screen Print"
+    );
+    checkResults(designs, filteredDesigns, [1025]);
   });
 });
 

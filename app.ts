@@ -61,6 +61,7 @@ const dropboxCredentials: DropboxCredentials = {
 app.get("/designs/:designId?", async (req, res) => {
   const {
     subcategories,
+    category: categoryQuery,
     keywords,
     tags,
     perPage,
@@ -73,6 +74,7 @@ app.get("/designs/:designId?", async (req, res) => {
   const { designId } = req.params;
 
   const subcategoriesArray = trySplitCommaSeparatedString(subcategories);
+  const category = `${categoryQuery}`;
   const keywordsArray = trySplitCommaSeparatedString(keywords);
   const tagsArray = trySplitCommaSeparatedString(tags);
   let designType: DesignType = "Screen Print";
@@ -117,6 +119,7 @@ app.get("/designs/:designId?", async (req, res) => {
     const filteredDesigns = filterDesigns(
       designs,
       keywordsArray,
+      category,
       subcategoriesArray,
       tagsArray,
       designType,
