@@ -66,14 +66,6 @@ function matchDesignCategories(design: TempDesign, category: string) {
     Subcategory5,
   ].some((subcategory) => {
     const parentCategory = subcategory?.split(" > ")[0];
-    if (
-      parentCategory &&
-      category.toLocaleLowerCase() === parentCategory?.toLocaleLowerCase()
-    ) {
-      console.log(design.DesignNumber + " DOES match");
-    } else {
-      console.log(design.DesignNumber + " DOES NOT match");
-    }
     return (
       parentCategory &&
       category.toLocaleLowerCase() === parentCategory?.toLocaleLowerCase()
