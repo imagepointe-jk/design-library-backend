@@ -74,7 +74,7 @@ app.get("/designs/:designId?", async (req, res) => {
   const { designId } = req.params;
 
   const subcategoriesArray = trySplitCommaSeparatedString(subcategories);
-  const category = `${categoryQuery}`;
+  const category = categoryQuery ? `${categoryQuery}` : undefined;
   const keywordsArray = trySplitCommaSeparatedString(keywords);
   const tagsArray = trySplitCommaSeparatedString(tags);
   let designType: DesignType = "Screen Print";
