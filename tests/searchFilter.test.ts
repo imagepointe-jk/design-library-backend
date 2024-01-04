@@ -44,7 +44,7 @@ describe("Correctly filter the sample data with various parameters", () => {
     checkResults(
       designs,
       filteredDesigns,
-      [1025, 1003, 1, 11, 1012, 1013, 1014, 1015, 1016, 1017, 1018]
+      [1025, 1003, 1, 11, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 549]
     );
   });
 
@@ -111,7 +111,7 @@ describe("Correctly filter the sample data with various parameters", () => {
       undefined,
       "Screen Print"
     );
-    checkResults(designs, filteredDesigns, [1003, 1, 11, 1012]);
+    checkResults(designs, filteredDesigns, [1003, 1, 11, 1012, 549]);
   });
 
   it("should only return the single screen print design that contains the keyword 'Tough' and is in the 'Staff Favorites' subcategory", async () => {
