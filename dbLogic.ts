@@ -13,10 +13,10 @@ async function getTempDb(
   dropboxCredentials: DropboxCredentials,
   isDevMode: boolean
 ) {
-  if (!isDevMode)
-    console.warn(
-      "======WARNING: Reading from the sample database while not running in development environment!"
-    );
+  // if (!isDevMode)
+  //   console.warn(
+  //     "======WARNING: Reading from the sample database while not running in development environment!"
+  //   );
   try {
     const file = isDevMode
       ? fs.readFileSync("./samples/sampleTempDb.xlsx")
