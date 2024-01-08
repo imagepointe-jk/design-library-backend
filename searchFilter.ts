@@ -138,7 +138,7 @@ function matchDesignTags(design: TempDesign, queryTagsArray?: string[]) {
 export function sortDesigns(designs: TempDesign[]) {
   designs.sort((design1, design2) => {
     if (design1.Featured === design2.Featured) {
-      return design1.DesignNumber < design2.DesignNumber ? -1 : 1;
+      return design1.DesignNumber < design2.DesignNumber ? 1 : -1;
     }
     return design1.Featured ? -1 : 1;
   });
