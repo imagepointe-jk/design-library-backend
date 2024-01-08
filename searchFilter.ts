@@ -29,21 +29,45 @@ export function filterDesigns(
 }
 
 function matchDesignKeywords(design: TempDesign, keywordsArray: string[]) {
-  const { Name, Description, Tag1, Tag2, Tag3, Tag4, Tag5, DesignNumber } =
-    design;
+  const {
+    Name,
+    Description,
+    Tag1,
+    Tag2,
+    Tag3,
+    Tag4,
+    Tag5,
+    Subcategory1,
+    Subcategory2,
+    Subcategory3,
+    Subcategory4,
+    Subcategory5,
+    DesignNumber,
+  } = design;
   const lowerCaseName = Name ? Name.toLocaleLowerCase() : "";
   const lowerCaseDescription = Description?.toLocaleLowerCase();
   const lowerCaseTags = [Tag1, Tag2, Tag3, Tag4, Tag5].map((tag) =>
     tag?.toLocaleLowerCase()
   );
+  const lowerCaseSubcategories = [
+    Subcategory1,
+    Subcategory2,
+    Subcategory3,
+    Subcategory4,
+    Subcategory5,
+  ]
+    .map((sub) => sub?.toLocaleLowerCase())
+    .join(" ");
   const lowerCaseDesignNumber = DesignNumber.toLocaleLowerCase();
 
   return keywordsArray.some((keyword) => {
     const lowerCaseKeyword = keyword.toLocaleLowerCase();
+
     return (
       lowerCaseName.includes(lowerCaseKeyword) ||
       lowerCaseDescription?.includes(lowerCaseKeyword) ||
       lowerCaseTags.includes(lowerCaseKeyword) ||
+      lowerCaseSubcategories.includes(lowerCaseKeyword) ||
       lowerCaseDesignNumber.includes(lowerCaseKeyword)
     );
   });
