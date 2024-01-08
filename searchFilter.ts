@@ -1,4 +1,5 @@
 import { DesignType, TempDesign } from "./tempDbSchema";
+import { getDesignTags } from "./utility";
 
 export function filterDesigns(
   designs: TempDesign[],
@@ -32,11 +33,6 @@ function matchDesignKeywords(design: TempDesign, keywordsArray: string[]) {
   const {
     Name,
     Description,
-    Tag1,
-    Tag2,
-    Tag3,
-    Tag4,
-    Tag5,
     Subcategory1,
     Subcategory2,
     Subcategory3,
@@ -46,7 +42,7 @@ function matchDesignKeywords(design: TempDesign, keywordsArray: string[]) {
   } = design;
   const lowerCaseName = Name ? Name.toLocaleLowerCase() : "";
   const lowerCaseDescription = Description?.toLocaleLowerCase();
-  const lowerCaseTags = [Tag1, Tag2, Tag3, Tag4, Tag5].map((tag) =>
+  const lowerCaseTags = getDesignTags(design).map((tag) =>
     tag?.toLocaleLowerCase()
   );
   const lowerCaseSubcategories = [
@@ -130,12 +126,11 @@ function matchDesignSubcategories(
 }
 
 function matchDesignTags(design: TempDesign, queryTagsArray?: string[]) {
-  const { Tag1, Tag2, Tag3, Tag4, Tag5 } = design;
   const lowerCaseQueryTags = queryTagsArray?.map((tag) =>
     tag.toLocaleLowerCase()
   );
 
-  return [Tag1, Tag2, Tag3, Tag4, Tag5].some(
+  return getDesignTags(design).some(
     (subcategory) => subcategory && lowerCaseQueryTags?.includes(subcategory)
   );
 }

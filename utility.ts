@@ -1,3 +1,5 @@
+import { TempDesign } from "./tempDbSchema";
+
 export function message(message: string) {
   return {
     message,
@@ -32,4 +34,35 @@ export function makeStringTitleCase(str: string) {
 
 export function minutesToMilliseconds(minutes: number) {
   return minutes * 60 * 1000;
+}
+
+export function getDesignTags(design: TempDesign) {
+  const {
+    Tag1,
+    Tag2,
+    Tag3,
+    Tag4,
+    Tag5,
+    Tag6,
+    Tag7,
+    Tag8,
+    Tag9,
+    Tag10,
+    Tag11,
+    Tag12,
+  } = design;
+  return [
+    Tag1,
+    Tag2,
+    Tag3,
+    Tag4,
+    Tag5,
+    Tag6,
+    Tag7,
+    Tag8,
+    Tag9,
+    Tag10,
+    Tag11,
+    Tag12,
+  ];
 }
