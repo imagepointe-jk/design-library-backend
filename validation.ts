@@ -14,6 +14,9 @@ export function parseDesign(json: any, type: DesignType, index: number) {
   json.DesignNumber = `${json["Design Number"]}`;
   json.Featured = json.Featured === "Yes" ? true : false;
 
+  json.Subcategory1 = json["Subcategory1 - Union"];
+  json.Subcategory2 = json["Subcategory2 - Holiday/Event"];
+
   json.DropboxImagePath1 = json["Dropbox Image Path 1"];
   json.DropboxImagePath2 = json["Dropbox Image Path 2"];
   json.DropboxImagePath3 = json["Dropbox Image Path 3"];
