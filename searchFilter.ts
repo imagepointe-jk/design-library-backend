@@ -1,5 +1,12 @@
 import { DesignType, TempDesign } from "./tempDbSchema";
-import { getDesignTags } from "./utility";
+import {
+  getDesignNumber,
+  getDesignCategoryHierarchies,
+  getDesignTags,
+  splitDesignCategoryHierarchy,
+  shouldDesignBeFeatured,
+  getDesignAgeClassification,
+} from "./utility";
 
 export function filterDesigns(
   designs: TempDesign[],
@@ -12,7 +19,8 @@ export function filterDesigns(
   allowDuplicateDesignNumbers?: boolean
 ) {
   return designs.filter((design, i, arr) => {
-    const { DesignType, Featured, DesignNumber, Status } = design;
+    const { DesignType, DesignNumber, Status } = design;
+    const treatAsFeatured = shouldDesignBeFeatured(design);
     return (
       Status !== "Draft" &&
       DesignNumber !== `${undefined}` &&
@@ -23,36 +31,21 @@ export function filterDesigns(
       (!category || matchDesignCategories(design, category)) &&
       (!subcategoriesArray ||
         matchDesignSubcategories(design, subcategoriesArray)) &&
-      (!onlyFeatured || (onlyFeatured && Featured)) &&
+      (!onlyFeatured || (onlyFeatured && treatAsFeatured)) &&
       (!keywordsArray || matchDesignKeywords(design, keywordsArray))
     );
   });
 }
 
 function matchDesignKeywords(design: TempDesign, keywordsArray: string[]) {
-  const {
-    Name,
-    Description,
-    Subcategory1,
-    Subcategory2,
-    Subcategory3,
-    Subcategory4,
-    Subcategory5,
-    DesignNumber,
-  } = design;
+  const { Name, Description, DesignNumber } = design;
   const lowerCaseName = Name ? Name.toLocaleLowerCase() : "";
   const lowerCaseDescription = Description?.toLocaleLowerCase();
   const lowerCaseTags = getDesignTags(design).map((tag) =>
     tag?.toLocaleLowerCase()
   );
-  const lowerCaseSubcategories = [
-    Subcategory1,
-    Subcategory2,
-    Subcategory3,
-    Subcategory4,
-    Subcategory5,
-  ]
-    .map((sub) => sub?.toLocaleLowerCase())
+  const lowerCaseHierarchies = getDesignCategoryHierarchies(design)
+    .map((hierarchy) => hierarchy?.toLocaleLowerCase())
     .join(" ");
   const lowerCaseDesignNumber = DesignNumber.toLocaleLowerCase();
 
@@ -63,29 +56,16 @@ function matchDesignKeywords(design: TempDesign, keywordsArray: string[]) {
       lowerCaseName.includes(lowerCaseKeyword) ||
       lowerCaseDescription?.includes(lowerCaseKeyword) ||
       lowerCaseTags.includes(lowerCaseKeyword) ||
-      lowerCaseSubcategories.includes(lowerCaseKeyword) ||
+      lowerCaseHierarchies.includes(lowerCaseKeyword) ||
       lowerCaseDesignNumber.includes(lowerCaseKeyword)
     );
   });
 }
 
 function matchDesignCategories(design: TempDesign, category: string) {
-  const {
-    Subcategory1,
-    Subcategory2,
-    Subcategory3,
-    Subcategory4,
-    Subcategory5,
-  } = design;
-
-  return [
-    Subcategory1,
-    Subcategory2,
-    Subcategory3,
-    Subcategory4,
-    Subcategory5,
-  ].some((subcategory) => {
-    const parentCategory = subcategory?.split(" > ")[0];
+  return getDesignCategoryHierarchies(design).some((hierarchy) => {
+    const parentCategory =
+      hierarchy && splitDesignCategoryHierarchy(hierarchy).category;
     return (
       parentCategory &&
       category.toLocaleLowerCase() === parentCategory?.toLocaleLowerCase()
@@ -97,32 +77,26 @@ function matchDesignSubcategories(
   design: TempDesign,
   querySubcategoriesArray: string[]
 ) {
-  const {
-    Subcategory1,
-    Subcategory2,
-    Subcategory3,
-    Subcategory4,
-    Subcategory5,
-  } = design;
   const lowerCaseQuerySubcategories = querySubcategoriesArray.map(
     (subcategory) => subcategory.toLocaleLowerCase()
   );
+  const designAge = getDesignAgeClassification(design);
+  const ageMatch =
+    (lowerCaseQuerySubcategories.includes("new designs") &&
+      designAge === "New") ||
+    (lowerCaseQuerySubcategories.includes("classics") &&
+      designAge === "Classic");
+  const otherMatch = getDesignCategoryHierarchies(design).some((hierarchy) => {
+    const subcategory =
+      hierarchy && splitDesignCategoryHierarchy(hierarchy).subcategory;
 
-  return [
-    Subcategory1,
-    Subcategory2,
-    Subcategory3,
-    Subcategory4,
-    Subcategory5,
-  ].some((subcategory) => {
-    const withoutParentCategory = subcategory?.split(" > ")[1];
     return (
-      withoutParentCategory &&
-      lowerCaseQuerySubcategories.includes(
-        withoutParentCategory?.toLocaleLowerCase()
-      )
+      subcategory &&
+      lowerCaseQuerySubcategories.includes(subcategory?.toLocaleLowerCase())
     );
   });
+
+  return ageMatch || otherMatch;
 }
 
 function matchDesignTags(design: TempDesign, queryTagsArray?: string[]) {
@@ -138,7 +112,12 @@ function matchDesignTags(design: TempDesign, queryTagsArray?: string[]) {
 export function sortDesigns(designs: TempDesign[]) {
   designs.sort((design1, design2) => {
     if (design1.Featured === design2.Featured) {
-      return design1.DesignNumber < design2.DesignNumber ? 1 : -1;
+      const design1Number = getDesignNumber(design1);
+      const design2Number = getDesignNumber(design2);
+
+      if (design1Number === undefined) return 1;
+      if (design2Number === undefined) return -1;
+      return design1Number < design2Number ? 1 : -1;
     }
     return design1.Featured ? -1 : 1;
   });

@@ -5,7 +5,11 @@ import { downloadTempDb, getDropboxFileURL } from "./fetch";
 import { TempDesign, TempDesignWithImages } from "./tempDbSchema";
 import { DropboxCredentials } from "./types";
 import { parseTempDb } from "./validation";
-import { isSettledPromiseFulfilled } from "./utility";
+import {
+  getDesignCategoryHierarchies,
+  isSettledPromiseFulfilled,
+  splitDesignCategoryHierarchy,
+} from "./utility";
 
 //? A spreadsheet is being used as a temporary pseudo-database.
 //? Use XLSX to read in the entire DB and store it as JSON.
@@ -99,23 +103,12 @@ export async function findDesignsInSubcategory(
   if (!designs) return undefined;
 
   const result = designs.filter((design) => {
-    const {
-      Subcategory1,
-      Subcategory2,
-      Subcategory3,
-      Subcategory4,
-      Subcategory5,
-    } = design;
-    const subcategories = [
-      Subcategory1,
-      Subcategory2,
-      Subcategory3,
-      Subcategory4,
-      Subcategory5,
-    ].map((hierarchy) => {
-      if (!hierarchy) return undefined;
-      return hierarchy.split(" > ")[1];
-    });
+    const subcategories = getDesignCategoryHierarchies(design).map(
+      (hierarchy) => {
+        if (!hierarchy) return undefined;
+        return splitDesignCategoryHierarchy(hierarchy).subcategory;
+      }
+    );
     return subcategories.includes(subcategory);
   });
 

@@ -25,6 +25,8 @@ export function parseDesign(json: any, type: DesignType, index: number) {
   json.DropboxImagePath6 = json["Dropbox Image Path 6"];
   json.DropboxImagePath7 = json["Dropbox Image Path 7"];
 
+  json.Date = `${json.Date}`;
+
   return tempDesignSchema.parse(json);
 }
 

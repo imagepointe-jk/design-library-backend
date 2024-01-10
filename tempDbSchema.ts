@@ -38,6 +38,7 @@ export const tempDesignSchema = z.object({
   DropboxImagePath7: z.string().optional(),
   DesignNumber: z.string(),
   Featured: z.boolean(),
+  Date: z.string().optional(),
   Status: designStatusSchema,
 });
 

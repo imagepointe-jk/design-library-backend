@@ -71,7 +71,7 @@ describe("Correctly filter the sample data with various parameters", () => {
       undefined,
       "Embroidery"
     );
-    checkResults(designs, filteredDesigns, [1006, 1000]);
+    checkResults(designs, filteredDesigns, [205, 1000]);
   });
 
   it("should only return the single design that is screen print and in the Best Sellers subcategory", async () => {
