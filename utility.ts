@@ -100,7 +100,7 @@ export function shouldDesignBeFeatured(design: TempDesign) {
 
   const isBestSeller = getDesignCategoryHierarchies(design).some((hierarchy) =>
     hierarchy
-      ? splitDesignCategoryHierarchy(hierarchy).subcategory === "Best Seller"
+      ? splitDesignCategoryHierarchy(hierarchy).subcategory === "Best Sellers"
       : false
   );
   const isNew = getDesignAgeClassification(design) === "New";
