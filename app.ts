@@ -2,6 +2,7 @@ import express, { json } from "express";
 import { defaultCountPerPage, errorMessages } from "./constants";
 import {
   getCategories,
+  getColors,
   getDesigns,
   getSubcategories,
   getTags,
@@ -172,6 +173,14 @@ app.get("/tags", async (req, res) => {
     res.status(INTERNAL_SERVER_ERROR).send(message(errorMessages.serverError));
 
   res.status(OK).send(tags);
+});
+
+app.get("/colors", async (req, res) => {
+  const colors = await getColors(dropboxCredentials, isDevMode);
+  if (!colors)
+    res.status(INTERNAL_SERVER_ERROR).send(message(errorMessages.serverError));
+
+  res.status(OK).send(colors);
 });
 
 const port = process.env.PORT || 3000;

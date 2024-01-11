@@ -82,6 +82,16 @@ export async function getTags(
   return db.Tags;
 }
 
+export async function getColors(
+  dropboxCredentials: DropboxCredentials,
+  isDevMode: boolean
+) {
+  const db = await getTempDb(dropboxCredentials, isDevMode);
+  if (!db) return undefined;
+
+  return db.Colors;
+}
+
 export async function findDesign(
   dropboxCredentials: DropboxCredentials,
   name: string,

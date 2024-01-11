@@ -57,10 +57,12 @@ export function parseTempDb(json: any) {
   const parsedSubcategories = json.Subcategories.map((subcategory: any) =>
     parseSubcategory(subcategory)
   );
+  const parsedColors = json.Colors.map((color: any) => `${color.Color}`);
 
   json.Designs = parsedScreenPrintDesigns.concat(parsedEmbroideryDesigns);
   json.Subcategories = parsedSubcategories;
   json.Categories = parsedCategories;
+  json.Colors = parsedColors;
 
   return tempDbSchema.parse(json);
 }

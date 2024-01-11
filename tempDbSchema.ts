@@ -63,6 +63,7 @@ export const tempDbSchema = z.object({
   Tags: z.array(z.object({ Name: z.string() })),
   Categories: z.array(tempCategorySchema),
   Subcategories: z.array(tempSubcategorySchema),
+  Colors: z.array(z.string()),
 });
 
 export type DesignType = z.infer<typeof designTypeSchema>;
