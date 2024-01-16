@@ -110,8 +110,7 @@ export function shouldDesignBeFeatured(design: TempDesign) {
 
 export function getDesignAgeClassification(design: TempDesign) {
   const ageInYears = getDesignAgeInDays(design) / 365;
-  const twoYears = 365 * 2;
-  return ageInYears < twoYears ? "New" : "Classic";
+  return ageInYears < 2 ? "New" : "Classic";
 }
 
 function getDesignAgeInDays(design: TempDesign) {

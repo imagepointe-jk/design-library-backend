@@ -194,6 +194,36 @@ describe("Correctly filter the sample data with various parameters", () => {
     );
     checkResults(designs, filteredDesigns, [1025]);
   });
+
+  it("should only return new screen print designs (newer than 2 years)", async () => {
+    const designs = await getDesigns(dropboxCredentials, true);
+    const filteredDesigns = filterDesigns(
+      designs,
+      undefined,
+      undefined,
+      ["New Designs"],
+      undefined,
+      "Screen Print"
+    );
+    checkResults(
+      designs,
+      filteredDesigns,
+      [1003, 1, 11, 1013, 1015, 1016, 1017, 549]
+    );
+  });
+
+  it("should only return classic screen print designs (older than 2 years)", async () => {
+    const designs = await getDesigns(dropboxCredentials, true);
+    const filteredDesigns = filterDesigns(
+      designs,
+      undefined,
+      undefined,
+      ["Classics"],
+      undefined,
+      "Screen Print"
+    );
+    checkResults(designs, filteredDesigns, [1025, 1012, 1014, 1018]);
+  });
 });
 
 function checkResults(
