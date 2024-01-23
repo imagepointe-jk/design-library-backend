@@ -2,7 +2,11 @@ import fs from "fs";
 import xlsx from "xlsx";
 import { errorMessages } from "./constants";
 import { downloadTempDb, getDropboxFileURL } from "./fetch";
-import { TempDesign, TempDesignWithImages } from "./tempDbSchema";
+import {
+  TempDesign,
+  TempDesignWithImages,
+  TempImageData,
+} from "./tempDbSchema";
 import { DropboxCredentials } from "./types";
 import { parseTempDb } from "./validation";
 import {
@@ -142,13 +146,17 @@ export async function populateSingleDesignImageURLs(
     path ? getDropboxFileURL(path, dropboxCredentials) : ""
   );
   const results = await Promise.allSettled(requests);
-  const ImageURLs = results.map((result) =>
-    isSettledPromiseFulfilled(result) ? result.value : ""
-  );
+  const ImageData: TempImageData[] = results.map((result, i) => {
+    const data: TempImageData = {
+      url: isSettledPromiseFulfilled(result) ? result.value : "",
+      hasTransparency: designImgPaths[i]?.endsWith(".png") || false,
+    };
+    return data;
+  });
 
   const designWithImage: TempDesignWithImages = {
     ...design,
-    ImageURLs,
+    ImageData,
   };
   return designWithImage;
 }
@@ -167,7 +175,7 @@ export async function populateDesignImageURLs(
       result
     )
       ? result.value
-      : { ...design, ImageURLs: [] };
+      : { ...design, ImageData: [] };
     return designWithURL;
   });
 

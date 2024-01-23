@@ -42,9 +42,14 @@ export const tempDesignSchema = z.object({
   Status: designStatusSchema,
 });
 
+export const tempImageDataSchema = z.object({
+  url: z.string(),
+  hasTransparency: z.boolean(),
+});
+
 export const tempDesignWithImagesSchema = z.intersection(
   tempDesignSchema,
-  z.object({ ImageURLs: z.array(z.string()) })
+  z.object({ ImageData: z.array(tempImageDataSchema) })
 );
 
 export const tempCategorySchema = z.object({
@@ -68,5 +73,6 @@ export const tempDbSchema = z.object({
 
 export type DesignType = z.infer<typeof designTypeSchema>;
 export type TempDesign = z.infer<typeof tempDesignSchema>;
+export type TempImageData = z.infer<typeof tempImageDataSchema>;
 export type TempDesignWithImages = z.infer<typeof tempDesignWithImagesSchema>;
 export type TempDb = z.infer<typeof tempDbSchema>;
