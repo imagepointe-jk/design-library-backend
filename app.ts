@@ -10,7 +10,13 @@ import {
   populateSingleDesignImageURLs,
 } from "./dbLogic";
 import { filterDesigns, sortDesigns } from "./searchFilter";
-import { INTERNAL_SERVER_ERROR, NOT_FOUND, OK } from "./statusCodes";
+import {
+  BAD_REQUEST,
+  INTERNAL_SERVER_ERROR,
+  NOT_AUTHENTICATED,
+  NOT_FOUND,
+  OK,
+} from "./statusCodes";
 import { DropboxCredentials } from "./types";
 import {
   getArrayPage as getPageOfArray,
@@ -19,7 +25,9 @@ import {
   trySplitCommaSeparatedString,
 } from "./utility";
 import { DesignType, designTypes } from "./tempDbSchema";
-import { parseDesignType } from "./validation";
+import { parseDesignType, parseQuoteRequest } from "./validation";
+import { ZodError } from "zod";
+import { sendQuoteRequestEmail } from "./mail";
 
 // #region Setup
 const app = express();
@@ -57,6 +65,11 @@ const dropboxCredentials: DropboxCredentials = {
   appKey: appKey!,
   appSecret: appSecret!,
 };
+
+const authPassword = process.env.AUTH_PASSWORD;
+if (!authPassword) {
+  console.error("Couldn't find the auth password!");
+}
 // #endregion
 
 app.get("/designs/:designId?", async (req, res) => {
@@ -181,6 +194,27 @@ app.get("/colors", async (req, res) => {
     res.status(INTERNAL_SERVER_ERROR).send(message(errorMessages.serverError));
 
   res.status(OK).send(colors);
+});
+
+app.post("/quote-request", async (req, res) => {
+  try {
+    const givenPassword = req.headers.authorization?.split(" ")[1];
+    if (givenPassword !== authPassword) {
+      return res
+        .status(NOT_AUTHENTICATED)
+        .send(message("Invalid authorization."));
+    }
+    const parsedBody = parseQuoteRequest(req.body);
+    sendQuoteRequestEmail(parsedBody);
+    return res.status(OK).send();
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return res.status(BAD_REQUEST).send(error);
+    } else if (error instanceof Error) {
+      console.error(error.message);
+    }
+    return res.status(INTERNAL_SERVER_ERROR).send(message("Unknown error."));
+  }
 });
 
 const port = process.env.PORT || 3000;

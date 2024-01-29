@@ -1,6 +1,7 @@
 import {
   DesignType,
   designTypeSchema,
+  quoteRequestSchema,
   tempCategorySchema,
   tempDbSchema,
   tempDesignSchema,
@@ -69,4 +70,8 @@ export function parseTempDb(json: any) {
 
 export function parseDesignType(str: string) {
   return designTypeSchema.parse(str);
+}
+
+export function parseQuoteRequest(json: any) {
+  return quoteRequestSchema.parse(json);
 }
