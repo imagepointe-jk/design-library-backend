@@ -41,6 +41,9 @@ app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (origin && (isDevMode || allowedOrigins.includes(origin))) {
     res.header("Access-Control-Allow-Origin", origin);
+    console.log(`Received a request from origin ${origin} and added header`);
+  } else {
+    console.log("Received an unexpected request");
   }
   res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
