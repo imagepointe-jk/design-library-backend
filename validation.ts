@@ -7,6 +7,7 @@ import {
   tempDesignSchema,
   tempSubcategorySchema,
 } from "./tempDbSchema";
+import { SortingType } from "./types";
 
 export function parseDesign(json: any, type: DesignType, index: number) {
   json.Id = index; //TEMPORARY SOLUTION for each design having a unique ID.
@@ -74,4 +75,10 @@ export function parseDesignType(str: string) {
 
 export function parseQuoteRequest(json: any) {
   return quoteRequestSchema.parse(json);
+}
+
+export function parseSortingType(str: string) {
+  const designNumber: SortingType = "design number";
+  const priority: SortingType = "priority";
+  if (str === designNumber || str === priority) return str;
 }

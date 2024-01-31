@@ -25,7 +25,11 @@ import {
   trySplitCommaSeparatedString,
 } from "./utility";
 import { DesignType, designTypes } from "./tempDbSchema";
-import { parseDesignType, parseQuoteRequest } from "./validation";
+import {
+  parseDesignType,
+  parseQuoteRequest,
+  parseSortingType,
+} from "./validation";
 import { ZodError } from "zod";
 import { sendQuoteRequestEmail } from "./mail";
 
@@ -41,9 +45,6 @@ app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (origin && (isDevMode || allowedOrigins.includes(origin))) {
     res.header("Access-Control-Allow-Origin", origin);
-    console.log(`Received a request from origin ${origin} and added header`);
-  } else {
-    console.log("Received an unexpected request");
   }
   res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
@@ -87,6 +88,7 @@ app.get("/designs/:designId?", async (req, res) => {
     featured,
     allowDuplicateDesignNumbers,
     getRelatedToId, //if an ID was specified, also return any designs with the same design number
+    sortBy,
   } = req.query;
   const { designId } = req.params;
 
@@ -103,6 +105,7 @@ app.get("/designs/:designId?", async (req, res) => {
   const pageNumberToUse = pageNumber !== undefined ? +pageNumber : 1;
   const allowDuplicates = `${allowDuplicateDesignNumbers}` === `${true}`;
   const getRelated = `${getRelatedToId}` === `${true}`;
+  const sortingType = parseSortingType(`${sortBy}`);
 
   try {
     const designs = await getDesigns(dropboxCredentials, isDevMode);
@@ -143,7 +146,7 @@ app.get("/designs/:designId?", async (req, res) => {
       onlyFeatured,
       allowDuplicates
     );
-    sortDesigns(filteredDesigns);
+    sortDesigns(filteredDesigns, sortingType);
 
     const paginated = getPageOfArray(
       filteredDesigns,

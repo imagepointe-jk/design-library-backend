@@ -40,6 +40,7 @@ export const tempDesignSchema = z.object({
   Featured: z.boolean(),
   Date: z.string().optional(),
   Status: designStatusSchema,
+  Priority: z.number().optional(),
 });
 
 export const tempImageDataSchema = z.object({

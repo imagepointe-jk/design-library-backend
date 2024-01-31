@@ -1,4 +1,5 @@
 import { DesignType, TempDesign } from "./tempDbSchema";
+import { SortingType } from "./types";
 import {
   getDesignNumber,
   getDesignCategoryHierarchies,
@@ -109,16 +110,36 @@ function matchDesignTags(design: TempDesign, queryTagsArray?: string[]) {
   );
 }
 
-export function sortDesigns(designs: TempDesign[]) {
+export function sortDesigns(
+  designs: TempDesign[],
+  sortingType: SortingType = "design number"
+) {
   designs.sort((design1, design2) => {
-    if (design1.Featured === design2.Featured) {
-      const design1Number = getDesignNumber(design1);
-      const design2Number = getDesignNumber(design2);
-
-      if (design1Number === undefined) return 1;
-      if (design2Number === undefined) return -1;
-      return design1Number < design2Number ? 1 : -1;
+    if (design1.Featured !== design2.Featured) {
+      return design1.Featured ? -1 : 1;
     }
-    return design1.Featured ? -1 : 1;
+
+    const sortingFunction = sortingFunctions[sortingType];
+    return sortingFunction(design1, design2);
   });
 }
+
+type SortingFunctions = {
+  [key in SortingType]: (design1: TempDesign, design2: TempDesign) => number;
+};
+
+const sortingFunctions: SortingFunctions = {
+  "design number": (design1: TempDesign, design2: TempDesign) => {
+    const design1Number = getDesignNumber(design1);
+    const design2Number = getDesignNumber(design2);
+
+    if (design1Number === undefined) return 1;
+    if (design2Number === undefined) return -1;
+    return design1Number < design2Number ? 1 : -1;
+  },
+  priority: (design1: TempDesign, design2: TempDesign) => {
+    if (design1.Priority === undefined) return 1;
+    if (design2.Priority === undefined) return -1;
+    return design1.Priority < design2.Priority ? 1 : -1;
+  },
+};
