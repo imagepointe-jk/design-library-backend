@@ -1,10 +1,12 @@
 import nodemailer from "nodemailer";
 import Mail from "nodemailer/lib/mailer";
 import { QuoteRequest } from "./tempDbSchema";
+import { app } from "./app";
 
-//TODO: The email should ideally not be sent from my work email!
-const designLibraryUrl =
-  "https://www.imagepointe.com/design-library-new-designs";
+const designLibraryUrl = () =>
+  app.get("env") === "development"
+    ? "https://www.imagepointe.com/design-library-development"
+    : "https://www.imagepointe.com/design-library-new-designs";
 
 function sendEmail(recipientAddress: string, subject: string, message: string) {
   const fromAddress = process.env.NODEMAILER_FROM_ADDRESS;
@@ -56,7 +58,7 @@ export function sendQuoteRequestEmail(quoteRequest: QuoteRequest) {
         <li>Comments: ${comments === "" ? "(No comments)" : comments}</li>
         </ul>
         The specific design they requested can be found at the following link. If you see multiple designs, the first one in the series will be the one they requested.
-        <a href="${designLibraryUrl}/?designId=${designId}">Design ID ${designId}</a>`;
+        <a href="${designLibraryUrl()}/?designId=${designId}">Design ID ${designId}</a>`;
 
   sendEmail(salesEmail, "New Design Quote Request", message);
 }

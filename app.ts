@@ -34,7 +34,7 @@ import { ZodError } from "zod";
 import { sendQuoteRequestEmail } from "./mail";
 
 // #region Setup
-const app = express();
+export const app = express();
 const isDevMode = app.get("env") === "development";
 
 const allowedOrigins = [
