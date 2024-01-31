@@ -34,7 +34,7 @@ import { ZodError } from "zod";
 import { sendQuoteRequestEmail } from "./mail";
 
 // #region Setup
-export const app = express();
+const app = express();
 const isDevMode = app.get("env") === "development";
 
 const allowedOrigins = [
@@ -211,7 +211,7 @@ app.post("/quote-request", async (req, res) => {
         .send(message("Invalid authorization."));
     }
     const parsedBody = parseQuoteRequest(req.body);
-    sendQuoteRequestEmail(parsedBody);
+    sendQuoteRequestEmail(parsedBody, isDevMode);
     return res.status(OK).send();
   } catch (error) {
     if (error instanceof ZodError) {
