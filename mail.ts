@@ -43,8 +43,17 @@ export function sendQuoteRequestEmail(
   quoteRequest: QuoteRequest,
   isDevMode: boolean
 ) {
-  const { comments, designId, email, firstName, lastName, phone, union } =
-    quoteRequest;
+  const {
+    comments,
+    designId,
+    designNumber,
+    garmentColor,
+    email,
+    firstName,
+    lastName,
+    phone,
+    union,
+  } = quoteRequest;
   const salesEmail = process.env.QUOTE_REQUEST_DEST_EMAIL;
   if (!salesEmail) {
     throw new Error("Missing sales email!");
@@ -58,11 +67,13 @@ export function sendQuoteRequestEmail(
         <li>Phone number: ${phone}</li>
         <li>Union: ${union}</li>
         <li>Comments: ${comments === "" ? "(No comments)" : comments}</li>
+        <li>Design Number: ${designNumber}</li>
+        <li>Garment Color: ${garmentColor}</li>
         </ul>
         The specific design they requested can be found at the following link. If you see multiple designs, the first one in the series will be the one they requested.
         <a href="${designLibraryUrl(
           isDevMode
-        )}/?designId=${designId}">Design ID ${designId}</a>`;
+        )}/?designId=${designId}">View Design</a>`;
 
   sendEmail(salesEmail, "New Design Quote Request", message);
 }

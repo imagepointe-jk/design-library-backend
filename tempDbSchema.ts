@@ -80,6 +80,8 @@ export const quoteRequestSchema = z.object({
   designId: z.number(),
   union: z.string(),
   comments: z.string(),
+  garmentColor: z.string(),
+  designNumber: z.string(),
 });
 
 export type DesignType = z.infer<typeof designTypeSchema>;
