@@ -17,23 +17,40 @@ export function filterDesigns(
   tagsArray?: string[],
   designType?: DesignType,
   onlyFeatured?: boolean,
-  allowDuplicateDesignNumbers?: boolean
+  allowDuplicateDesignNumbers?: boolean,
+  shouldExcludePrioritized?: boolean
 ) {
   return designs.filter((design, i, arr) => {
-    const { DesignType, DesignNumber, Status } = design;
+    const { DesignType, DesignNumber, Status, Priority } = design;
     const treatAsFeatured = shouldDesignBeFeatured(design);
+
+    const isPublished = Status !== "Draft";
+    const hasDesignNumber = DesignNumber !== `${undefined}`;
+    const duplicateDesignNumberCheck =
+      allowDuplicateDesignNumbers ||
+      i === 0 ||
+      (i > 0 && arr[i - 1].DesignNumber !== DesignNumber);
+    const designTypeCheck = !designType || designType === DesignType;
+    const categoryCheck = !category || matchDesignCategories(design, category);
+    const subcategoryCheck =
+      !subcategoriesArray ||
+      matchDesignSubcategories(design, subcategoriesArray);
+    const featuredCheck = !onlyFeatured || (onlyFeatured && treatAsFeatured);
+    const keywordCheck =
+      !keywordsArray || matchDesignKeywords(design, keywordsArray);
+    const excludePrioritizedCheck =
+      Priority === undefined || !shouldExcludePrioritized;
+
     return (
-      Status !== "Draft" &&
-      DesignNumber !== `${undefined}` &&
-      (allowDuplicateDesignNumbers ||
-        i === 0 ||
-        (i > 0 && arr[i - 1].DesignNumber !== DesignNumber)) &&
-      (!designType || designType === DesignType) &&
-      (!category || matchDesignCategories(design, category)) &&
-      (!subcategoriesArray ||
-        matchDesignSubcategories(design, subcategoriesArray)) &&
-      (!onlyFeatured || (onlyFeatured && treatAsFeatured)) &&
-      (!keywordsArray || matchDesignKeywords(design, keywordsArray))
+      isPublished &&
+      hasDesignNumber &&
+      duplicateDesignNumberCheck &&
+      designTypeCheck &&
+      categoryCheck &&
+      subcategoryCheck &&
+      featuredCheck &&
+      keywordCheck &&
+      excludePrioritizedCheck
     );
   });
 }
