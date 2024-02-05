@@ -40,6 +40,7 @@ export const tempDesignSchema = z.object({
   Featured: z.boolean(),
   Date: z.string().optional(),
   Status: designStatusSchema,
+  Priority: z.number().optional(),
 });
 
 export const tempImageDataSchema = z.object({
@@ -71,8 +72,21 @@ export const tempDbSchema = z.object({
   Colors: z.array(z.string()),
 });
 
+export const quoteRequestSchema = z.object({
+  firstName: z.string(),
+  lastName: z.string(),
+  email: z.string().email(),
+  phone: z.number(),
+  designId: z.number(),
+  union: z.string(),
+  comments: z.string(),
+  garmentColor: z.string(),
+  designNumber: z.string(),
+});
+
 export type DesignType = z.infer<typeof designTypeSchema>;
 export type TempDesign = z.infer<typeof tempDesignSchema>;
 export type TempImageData = z.infer<typeof tempImageDataSchema>;
 export type TempDesignWithImages = z.infer<typeof tempDesignWithImagesSchema>;
 export type TempDb = z.infer<typeof tempDbSchema>;
+export type QuoteRequest = z.infer<typeof quoteRequestSchema>;

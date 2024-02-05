@@ -15,3 +15,5 @@ export type SimpleStringCache = {
     value: string;
   };
 };
+
+export type SortingType = "design number" | "priority";
