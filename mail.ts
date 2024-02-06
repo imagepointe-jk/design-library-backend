@@ -5,7 +5,7 @@ import { QuoteRequest } from "./tempDbSchema";
 const designLibraryUrl = (isDevMode: boolean) =>
   isDevMode
     ? "https://www.imagepointe.com/design-library-development"
-    : "https://www.imagepointe.com/design-library-new-designs";
+    : "https://www.imagepointe.com/design-library";
 
 function sendEmail(recipientAddress: string, subject: string, message: string) {
   const fromAddress = process.env.NODEMAILER_FROM_ADDRESS;

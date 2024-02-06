@@ -19,6 +19,8 @@ export function parseDesign(json: any, type: DesignType, index: number) {
   json.Subcategory1 = json["Subcategory1 - Union"];
   json.Subcategory2 = json["Subcategory2 - Holiday/Event"];
 
+  json.ImageURL = json["Image URL"];
+
   json.DropboxImagePath1 = json["Dropbox Image Path 1"];
   json.DropboxImagePath2 = json["Dropbox Image Path 2"];
   json.DropboxImagePath3 = json["Dropbox Image Path 3"];
