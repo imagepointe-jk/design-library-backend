@@ -29,6 +29,7 @@ export const tempDesignSchema = z.object({
   Tag10: z.string().optional(),
   Tag11: z.string().optional(),
   Tag12: z.string().optional(),
+  ImageURL: z.string().optional(),
   DropboxImagePath1: z.string().optional(),
   DropboxImagePath2: z.string().optional(),
   DropboxImagePath3: z.string().optional(),
