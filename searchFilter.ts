@@ -82,11 +82,17 @@ function matchDesignKeywords(design: TempDesign, keywordsArray: string[]) {
 
 function matchDesignCategories(design: TempDesign, category: string) {
   return getDesignCategoryHierarchies(design).some((hierarchy) => {
-    const parentCategory =
+    const parentCategoryListed =
       hierarchy && splitDesignCategoryHierarchy(hierarchy).category;
+    const designAge = getDesignAgeClassification(design);
+    //if this design is considered new, then it should be treated as being in the "New Designs" category.
+    //and "New Designs" has "Quick Search" as its parent category (per strategy document).
+    //So all new designs have "Quick Search" as their parent category.
+    const parentCategoryToUse =
+      designAge === "New" ? "Quick Search" : parentCategoryListed;
     return (
-      parentCategory &&
-      category.toLocaleLowerCase() === parentCategory?.toLocaleLowerCase()
+      parentCategoryToUse &&
+      category.toLocaleLowerCase() === parentCategoryToUse?.toLocaleLowerCase()
     );
   });
 }
