@@ -168,41 +168,69 @@ app.get("/designs/:designId?", async (req, res) => {
       designs: withImageLinks,
     });
   } catch (error) {
-    if (error instanceof Error)
-      return res.status(INTERNAL_SERVER_ERROR).send(message(error.message));
+    const errorMessage = error instanceof Error ? error.message : "";
+    return res.status(INTERNAL_SERVER_ERROR).send(message(errorMessage));
   }
 });
 
 app.get("/categories", async (req, res) => {
-  const categories = await getCategories(dropboxCredentials, isDevMode);
-  if (!categories)
-    res.status(INTERNAL_SERVER_ERROR).send(message(errorMessages.serverError));
+  try {
+    const categories = await getCategories(dropboxCredentials, isDevMode);
+    if (!categories)
+      res
+        .status(INTERNAL_SERVER_ERROR)
+        .send(message(errorMessages.serverError));
 
-  res.status(OK).send(categories);
+    res.status(OK).send(categories);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "";
+    return res.status(INTERNAL_SERVER_ERROR).send(message(errorMessage));
+  }
 });
 
 app.get("/subcategories", async (req, res) => {
-  const subcategories = await getSubcategories(dropboxCredentials, isDevMode);
-  if (!subcategories)
-    res.status(INTERNAL_SERVER_ERROR).send(message(errorMessages.serverError));
+  try {
+    const subcategories = await getSubcategories(dropboxCredentials, isDevMode);
+    if (!subcategories)
+      res
+        .status(INTERNAL_SERVER_ERROR)
+        .send(message(errorMessages.serverError));
 
-  res.status(OK).send(subcategories);
+    res.status(OK).send(subcategories);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "";
+    return res.status(INTERNAL_SERVER_ERROR).send(message(errorMessage));
+  }
 });
 
 app.get("/tags", async (req, res) => {
-  const tags = await getTags(dropboxCredentials, isDevMode);
-  if (!tags)
-    res.status(INTERNAL_SERVER_ERROR).send(message(errorMessages.serverError));
+  try {
+    const tags = await getTags(dropboxCredentials, isDevMode);
+    if (!tags)
+      res
+        .status(INTERNAL_SERVER_ERROR)
+        .send(message(errorMessages.serverError));
 
-  res.status(OK).send(tags);
+    res.status(OK).send(tags);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "";
+    return res.status(INTERNAL_SERVER_ERROR).send(message(errorMessage));
+  }
 });
 
 app.get("/colors", async (req, res) => {
-  const colors = await getColors(dropboxCredentials, isDevMode);
-  if (!colors)
-    res.status(INTERNAL_SERVER_ERROR).send(message(errorMessages.serverError));
+  try {
+    const colors = await getColors(dropboxCredentials, isDevMode);
+    if (!colors)
+      res
+        .status(INTERNAL_SERVER_ERROR)
+        .send(message(errorMessages.serverError));
 
-  res.status(OK).send(colors);
+    res.status(OK).send(colors);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "";
+    return res.status(INTERNAL_SERVER_ERROR).send(message(errorMessage));
+  }
 });
 
 app.post("/quote-request", async (req, res) => {
