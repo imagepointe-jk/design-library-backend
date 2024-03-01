@@ -107,7 +107,8 @@ app.get("/designs/:designId?", async (req, res) => {
   const allowDuplicates = `${allowDuplicateDesignNumbers}` === `${true}`;
   const getRelated = `${getRelatedToId}` === `${true}`;
   const sortingType = parseSortingType(`${sortBy}`);
-  const shouldExcludePrioritized = `${excludePrioritized}` === `${true}`;
+  // const shouldExcludePrioritized = `${excludePrioritized}` === `${true}`;
+  const shouldExcludePrioritized = false; //temporarily disable this feature
 
   try {
     const designs = await getDesigns(dropboxCredentials, isDevMode);

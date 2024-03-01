@@ -146,17 +146,27 @@ type SortingFunctions = {
 };
 
 const sortingFunctions: SortingFunctions = {
-  "design number": (design1: TempDesign, design2: TempDesign) => {
-    const design1Number = getDesignNumber(design1);
-    const design2Number = getDesignNumber(design2);
-
-    if (design1Number === undefined) return 1;
-    if (design2Number === undefined) return -1;
-    return design1Number < design2Number ? 1 : -1;
-  },
+  "design number": designNumberSort,
   priority: (design1: TempDesign, design2: TempDesign) => {
-    if (design1.Priority === undefined) return 1;
-    if (design2.Priority === undefined) return -1;
+    if (design1.Priority === undefined) {
+      if (design2.Priority === undefined)
+        return designNumberSort(design1, design2);
+      return 1;
+    }
+    if (design2.Priority === undefined) {
+      if (design1.Priority === undefined)
+        return designNumberSort(design1, design2);
+      return -1;
+    }
     return design1.Priority < design2.Priority ? 1 : -1;
   },
 };
+
+function designNumberSort(design1: TempDesign, design2: TempDesign) {
+  const design1Number = getDesignNumber(design1);
+  const design2Number = getDesignNumber(design2);
+
+  if (design1Number === undefined) return 1;
+  if (design2Number === undefined) return -1;
+  return design1Number < design2Number ? 1 : -1;
+}
