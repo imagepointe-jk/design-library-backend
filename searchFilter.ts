@@ -85,11 +85,13 @@ function matchDesignCategories(design: TempDesign, category: string) {
     const parentCategoryListed =
       hierarchy && splitDesignCategoryHierarchy(hierarchy).category;
     const designAge = getDesignAgeClassification(design);
-    //if this design is considered new, then it should be treated as being in the "New Designs" category.
+    //if this design is screen print AND considered new, then it should be treated as being in the "New Designs" category.
     //and "New Designs" has "Quick Search" as its parent category (per strategy document).
-    //So all new designs have "Quick Search" as their parent category.
+    //So all new screen print designs have "Quick Search" as their parent category.
     const parentCategoryToUse =
-      designAge === "New" ? "Quick Search" : parentCategoryListed;
+      designAge === "New" && design.DesignType === "Screen Print"
+        ? "Quick Search"
+        : parentCategoryListed;
     return (
       parentCategoryToUse &&
       category.toLocaleLowerCase() === parentCategoryToUse?.toLocaleLowerCase()
