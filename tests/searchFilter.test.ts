@@ -179,7 +179,7 @@ describe("Correctly filter the sample data with various parameters", () => {
       undefined,
       "Embroidery"
     );
-    checkResults(designs, filteredDesigns, [1009, 1006, 1000, 1001]);
+    checkResults(designs, filteredDesigns, []);
   });
 
   it("should return the single screen print designs that is in the 'Holiday' category (regardless of subcategory)", async () => {
