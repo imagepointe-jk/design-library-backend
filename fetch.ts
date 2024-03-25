@@ -134,6 +134,7 @@ export async function downloadTempDb(dropboxCredentials: DropboxCredentials) {
   //if our current access token is expired, get a new one, then try again
   if (status === NOT_AUTHENTICATED) {
     await updateDropboxAccessToken(dropboxCredentials);
+    options.headers.Authorization = `Bearer ${accessToken}`;
     response = await fetch(url, options);
     status = response.status;
   }
