@@ -22,8 +22,7 @@ async function getTempDb(
   //   );
   try {
     const file = isDevMode
-      ? // ? fs.readFileSync("./samples/sampleTempDb.xlsx")
-        fs.readFileSync("./samples/Design Data 3-1-24.xlsx")
+      ? fs.readFileSync("./samples/sampleTempDb.xlsx")
       : await downloadTempDb(dropboxCredentials);
     const workbook = xlsx.read(file, { type: "buffer" });
     const data: any = {};
