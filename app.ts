@@ -6,8 +6,6 @@ import {
   getDesigns,
   getSubcategories,
   getTags,
-  populateDesignImageURLs,
-  populateSingleDesignImageURLs,
 } from "./dbLogic";
 import { filterDesigns, sortDesigns } from "./searchFilter";
 import {
@@ -127,17 +125,9 @@ app.get("/designs/:designId?", async (req, res) => {
         const designsWithSameDesignNumber = designs.filter(
           (design) => design.DesignNumber === designWithDesignId.DesignNumber
         );
-        const withImages = await populateDesignImageURLs(
-          designsWithSameDesignNumber,
-          dropboxCredentials
-        );
-        return res.status(OK).send(withImages);
+        return res.status(OK).send(designsWithSameDesignNumber);
       }
-      const designWithImage = await populateSingleDesignImageURLs(
-        designWithDesignId,
-        dropboxCredentials
-      );
-      return res.status(OK).send(designWithImage);
+      return res.status(OK).send(designWithDesignId);
     }
 
     const filteredDesigns = filterDesigns(
@@ -159,15 +149,11 @@ app.get("/designs/:designId?", async (req, res) => {
       amountPerPage
     );
     const status = paginated.length === 0 ? NOT_FOUND : OK;
-    const withImageLinks = await populateDesignImageURLs(
-      paginated,
-      dropboxCredentials
-    );
     res.status(status).send({
       pageNumber: pageNumberToUse,
       perPage: amountPerPage,
       total: filteredDesigns.length,
-      designs: withImageLinks,
+      designs: paginated,
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "";
