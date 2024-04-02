@@ -1,17 +1,12 @@
 import fs from "fs";
 import xlsx from "xlsx";
 import { errorMessages } from "./constants";
-import { downloadTempDb, getDropboxFileURL } from "./fetch";
-import {
-  TempDesign,
-  TempDesignWithImages,
-  TempImageData,
-} from "./tempDbSchema";
+import { downloadTempDb } from "./fetch";
+import { TempDesign } from "./tempDbSchema";
 import { DropboxCredentials } from "./types";
 import { parseTempDb } from "./validation";
 import {
   getDesignCategoryHierarchies,
-  isSettledPromiseFulfilled,
   splitDesignCategoryHierarchy,
 } from "./utility";
 
@@ -127,57 +122,4 @@ export async function findDesignsInSubcategory(
   });
 
   return result;
-}
-
-export async function populateSingleDesignImageURLs(
-  design: TempDesign,
-  dropboxCredentials: DropboxCredentials
-): Promise<TempDesignWithImages> {
-  const designImgPaths = [
-    design.DropboxImagePath1,
-    design.DropboxImagePath2,
-    design.DropboxImagePath3,
-    design.DropboxImagePath4,
-    design.DropboxImagePath5,
-    design.DropboxImagePath6,
-    design.DropboxImagePath7,
-  ];
-  const requests = designImgPaths.map((path) =>
-    path ? getDropboxFileURL(path, dropboxCredentials) : ""
-  );
-  const results = await Promise.allSettled(requests);
-  const ImageData: TempImageData[] = results.map((result, i) => {
-    const data: TempImageData = {
-      url: isSettledPromiseFulfilled(result) ? result.value : "",
-      hasTransparency: designImgPaths[i]?.endsWith(".png") || false,
-    };
-    return data;
-  });
-
-  const designWithImage: TempDesignWithImages = {
-    ...design,
-    ImageData,
-  };
-  return designWithImage;
-}
-
-export async function populateDesignImageURLs(
-  designs: TempDesign[],
-  dropboxCredentials: DropboxCredentials
-): Promise<TempDesignWithImages[]> {
-  const requests = designs.map((design) =>
-    populateSingleDesignImageURLs(design, dropboxCredentials)
-  );
-  const results = await Promise.allSettled(requests);
-  const designsWithURLs = designs.map((design, i) => {
-    const result = results[i];
-    const designWithURL: TempDesignWithImages = isSettledPromiseFulfilled(
-      result
-    )
-      ? result.value
-      : { ...design, ImageData: [] };
-    return designWithURL;
-  });
-
-  return designsWithURLs;
 }

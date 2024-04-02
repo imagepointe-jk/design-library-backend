@@ -30,13 +30,6 @@ export const tempDesignSchema = z.object({
   Tag11: z.string().optional(),
   Tag12: z.string().optional(),
   ImageURL: z.string().optional(),
-  DropboxImagePath1: z.string().optional(),
-  DropboxImagePath2: z.string().optional(),
-  DropboxImagePath3: z.string().optional(),
-  DropboxImagePath4: z.string().optional(),
-  DropboxImagePath5: z.string().optional(),
-  DropboxImagePath6: z.string().optional(),
-  DropboxImagePath7: z.string().optional(),
   DesignNumber: z.string(),
   Featured: z.boolean(),
   Date: z.string().optional(),
@@ -48,11 +41,6 @@ export const tempImageDataSchema = z.object({
   url: z.string(),
   hasTransparency: z.boolean(),
 });
-
-export const tempDesignWithImagesSchema = z.intersection(
-  tempDesignSchema,
-  z.object({ ImageData: z.array(tempImageDataSchema) })
-);
 
 export const tempCategorySchema = z.object({
   Name: z.string(),
@@ -88,6 +76,5 @@ export const quoteRequestSchema = z.object({
 export type DesignType = z.infer<typeof designTypeSchema>;
 export type TempDesign = z.infer<typeof tempDesignSchema>;
 export type TempImageData = z.infer<typeof tempImageDataSchema>;
-export type TempDesignWithImages = z.infer<typeof tempDesignWithImagesSchema>;
 export type TempDb = z.infer<typeof tempDbSchema>;
 export type QuoteRequest = z.infer<typeof quoteRequestSchema>;
