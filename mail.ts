@@ -4,8 +4,8 @@ import { QuoteRequest } from "./tempDbSchema";
 
 const designLibraryUrl = (isDevMode: boolean) =>
   isDevMode
-    ? "https://www.imagepointe.com/design-library-development"
-    : "https://www.imagepointe.com/design-library";
+    ? "https://www.imagepointe.com/design-library"
+    : "https://www.imagepointe.com/design-library"; //we may want to vary this later but not now
 
 function sendEmail(recipientAddress: string, subject: string, message: string) {
   const fromAddress = process.env.NODEMAILER_FROM_ADDRESS;
@@ -73,7 +73,7 @@ export function sendQuoteRequestEmail(
         The specific design they requested can be found at the following link. If you see multiple designs, the first one in the series will be the one they requested.
         <a href="${designLibraryUrl(
           isDevMode
-        )}/?designId=${designId}">View Design</a>`;
+        )}/?viewDesign=${designId}">View Design</a>`;
 
   sendEmail(salesEmail, "New Design Quote Request", message);
 }
