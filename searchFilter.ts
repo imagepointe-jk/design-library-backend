@@ -9,6 +9,8 @@ import {
   getDesignAgeClassification,
 } from "./utility";
 
+const minimumTagsInCommon = 3; //how many tags two designs must have in common to be considered "similar"
+
 export function filterDesigns(
   designs: TempDesign[],
   keywordsArray?: string[],
@@ -18,8 +20,10 @@ export function filterDesigns(
   designType?: DesignType,
   onlyFeatured?: boolean,
   allowDuplicateDesignNumbers?: boolean,
-  shouldExcludePrioritized?: boolean
+  shouldExcludePrioritized?: boolean,
+  similarTo?: number
 ) {
+  const designToCompare = designs.find((design) => design.Id === similarTo);
   return designs.filter((design, i, arr) => {
     const { DesignType, DesignNumber, Status, Priority } = design;
     const treatAsFeatured = shouldDesignBeFeatured(design);
@@ -40,6 +44,7 @@ export function filterDesigns(
       !keywordsArray || matchDesignKeywords(design, keywordsArray);
     const excludePrioritizedCheck =
       Priority === undefined || !shouldExcludePrioritized;
+    const similarDesignCheck = matchSimilarDesign(design, designToCompare);
 
     return (
       isPublished &&
@@ -50,7 +55,8 @@ export function filterDesigns(
       subcategoryCheck &&
       featuredCheck &&
       keywordCheck &&
-      excludePrioritizedCheck
+      excludePrioritizedCheck &&
+      similarDesignCheck
     );
   });
 }
@@ -133,6 +139,23 @@ function matchDesignTags(design: TempDesign, queryTagsArray?: string[]) {
   return getDesignTags(design).some(
     (subcategory) => subcategory && lowerCaseQueryTags?.includes(subcategory)
   );
+}
+
+function matchSimilarDesign(design: TempDesign, designToCompare?: TempDesign) {
+  if (!designToCompare) return true;
+
+  //ignore the "union" tag because too many designs have it
+  const designTags = getDesignTags(design).filter(
+    (tag) => tag !== undefined && tag.toLocaleLowerCase() !== "union"
+  );
+  const designToCompareTags = getDesignTags(designToCompare).filter(
+    (tag) => tag !== undefined && tag.toLocaleLowerCase() !== "union"
+  );
+  const tagsInCommon = designTags.filter((tag) =>
+    designToCompareTags.includes(tag)
+  ).length;
+
+  return tagsInCommon >= minimumTagsInCommon;
 }
 
 export function sortDesigns(

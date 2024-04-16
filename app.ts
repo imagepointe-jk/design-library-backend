@@ -88,6 +88,7 @@ app.get("/designs/:designId?", async (req, res) => {
     allowDuplicateDesignNumbers,
     getRelatedToId, //if an ID was specified, also return any designs with the same design number
     sortBy,
+    similarTo,
     excludePrioritized, //if true, this helps prevent showing designs again in the main library when they're already featured in the top slider. should be used sparingly to avoid hiding designs at unexpected times.
   } = req.query;
   const { designId } = req.params;
@@ -106,6 +107,7 @@ app.get("/designs/:designId?", async (req, res) => {
   const allowDuplicates = `${allowDuplicateDesignNumbers}` === `${true}`;
   const getRelated = `${getRelatedToId}` === `${true}`;
   const sortingType = parseSortingType(`${sortBy}`);
+  const similarToId = similarTo && !isNaN(+similarTo) ? +similarTo : undefined;
   // const shouldExcludePrioritized = `${excludePrioritized}` === `${true}`;
   const shouldExcludePrioritized = false; //temporarily disable this feature
 
@@ -139,7 +141,8 @@ app.get("/designs/:designId?", async (req, res) => {
       designType,
       onlyFeatured,
       allowDuplicates,
-      shouldExcludePrioritized
+      shouldExcludePrioritized,
+      similarToId
     );
     sortDesigns(filteredDesigns, sortingType);
 
