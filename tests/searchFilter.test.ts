@@ -12,228 +12,275 @@ const dropboxCredentials: DropboxCredentials = {
   appSecret: appSecret!,
 };
 
+const publishedScreenPrintDesignNumbers = [
+  "139",
+  "220",
+  "267",
+  "385",
+  "392",
+  "453",
+  "458",
+  "461",
+  "499",
+  "522",
+  "547",
+  "625",
+  "641",
+  "710",
+  "774",
+  "854",
+  "1027",
+  "1030",
+  "1069",
+  "1091",
+  "1107",
+  "1107",
+  "1119",
+  "1122",
+  "1150",
+  "1180",
+  "1234",
+  "1252",
+  "1252",
+  "1281",
+  "1348",
+  "1359",
+  "1512",
+  "1518",
+  "1520",
+  "1547",
+  "1556",
+  "1617",
+  "1639",
+  "1658",
+  "1659",
+  "1674",
+  "1684",
+  "1695",
+  "1734",
+  "1747",
+  "1320 (Sleeve)",
+  "771 (Oversize)",
+  "911 (Oversize)",
+];
+
+const publishedEmbroideryDesignNumbers = [
+  "205",
+  "342",
+  "435",
+  "435",
+  "445",
+  "445",
+  "447",
+  "448",
+  "493",
+  "531",
+  "531",
+  "532",
+  "534",
+  "567",
+  "567",
+  "594",
+  "659",
+  "660",
+  "753",
+  "754",
+  "757",
+  "758",
+  "758",
+  "758",
+  "758",
+  "758",
+  "779",
+  "785",
+  "802",
+  "813",
+  "969",
+  "982",
+  "983",
+  "985",
+  "1002",
+  "1046",
+  "1052",
+  "1190",
+  "1191",
+  "E11292",
+  "E15121",
+  "E16190",
+  "E19873",
+  "E19873",
+  "E22203",
+  "E23023",
+  "E32172",
+  "E32172",
+];
+
 describe("Correctly filter the sample data with various parameters", () => {
   it("should return all PUBLISHED designs when no filters are provided", async () => {
     const designs = await getDesigns(dropboxCredentials, true);
-    const filteredDesigns = filterDesigns(
-      designs,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      true
-    );
+    const filteredDesigns = filterDesigns(designs, {
+      allowDuplicateDesignNumbers: true,
+    });
     const publishedDesignNumbers = designs
       .filter((design) => design.Status !== "Draft")
-      .map((design) => +design.DesignNumber);
-    checkResults(designs, filteredDesigns, publishedDesignNumbers);
+      .map((design) => design.DesignNumber);
+    checkResults(filteredDesigns, publishedDesignNumbers);
   });
 
   it("should return only screen print designs when screen print is the design type", async () => {
     const designs = await getDesigns(dropboxCredentials, true);
-    const filteredDesigns = filterDesigns(
-      designs,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      "Screen Print"
-    );
-    checkResults(
-      designs,
-      filteredDesigns,
-      [1025, 1003, 1, 11, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 549]
-    );
+    const filteredDesigns = filterDesigns(designs, {
+      designType: "Screen Print",
+      allowDuplicateDesignNumbers: true,
+    });
+    checkResults(filteredDesigns, publishedScreenPrintDesignNumbers);
   });
 
-  it("should return only embroidery designs when embroidery is the design type", async () => {
+  it("should only return embroidery designs considered 'Classics' relative to a certain date", async () => {
     const designs = await getDesigns(dropboxCredentials, true);
-    const filteredDesigns = filterDesigns(
-      designs,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      "Embroidery"
-    );
-    checkResults(designs, filteredDesigns, [1009, 1006, 1000, 1001, 205]);
+    const filteredDesigns = filterDesigns(designs, {
+      designType: "Embroidery",
+      category: "Quick Search",
+      subcategoriesArray: ["Classics"],
+      allowDuplicateDesignNumbers: true,
+      newDesignReferenceDate: new Date("4/18/24").getTime(),
+    });
+    checkResults(filteredDesigns, publishedEmbroideryDesignNumbers);
   });
 
-  it("should only return embroidery designs in the Classics subcategory", async () => {
+  it("should find 0 embroidery designs considered 'new' relative to a certain date", async () => {
     const designs = await getDesigns(dropboxCredentials, true);
-    const filteredDesigns = filterDesigns(
-      designs,
-      undefined,
-      undefined,
-      ["Classics"],
-      undefined,
-      "Embroidery"
-    );
-    checkResults(designs, filteredDesigns, [205, 1000]);
+    const filteredDesigns = filterDesigns(designs, {
+      designType: "Embroidery",
+      category: "Quick Search",
+      subcategoriesArray: ["New Designs"],
+      allowDuplicateDesignNumbers: true,
+      newDesignReferenceDate: new Date("4/18/24").getTime(),
+    });
+    checkResults(filteredDesigns, []);
   });
 
-  it("should only return the single design that is screen print and in the Best Sellers subcategory", async () => {
+  it("should only return screen print designs considered 'new' relative to a certain date", async () => {
     const designs = await getDesigns(dropboxCredentials, true);
-    const filteredDesigns = filterDesigns(
-      designs,
-      undefined,
-      undefined,
-      ["Best Sellers"],
-      undefined,
-      "Screen Print"
-    );
-    checkResults(designs, filteredDesigns, [1025]);
+    const filteredDesigns = filterDesigns(designs, {
+      designType: "Screen Print",
+      category: "Quick Search",
+      subcategoriesArray: ["New Designs"],
+      newDesignReferenceDate: new Date("4/18/24").getTime(),
+    });
+    checkResults(filteredDesigns, [
+      "1639",
+      "1658",
+      "1659",
+      "1674",
+      "1684",
+      "1695",
+      "1734",
+      "1747",
+    ]);
   });
 
-  it("should only return featured embroidery designs", async () => {
+  it("should only return screen print designs in the 'patriotic' subcategory", async () => {
     const designs = await getDesigns(dropboxCredentials, true);
-    const filteredDesigns = filterDesigns(
-      designs,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      "Embroidery",
-      true
-    );
-    checkResults(designs, filteredDesigns, [1009, 1006, 205]);
+    const filteredDesigns = filterDesigns(designs, {
+      designType: "Screen Print",
+      category: "Quick Search",
+      subcategoriesArray: ["Patriotic"],
+      allowDuplicateDesignNumbers: true,
+    });
+    checkResults(filteredDesigns, [
+      "139",
+      "499",
+      "547",
+      "854",
+      "1027",
+      "1069",
+      "1091",
+      "1119",
+      "1150",
+      "1252",
+      "1252",
+    ]);
   });
 
-  it("should only return screen print designs that contain the keyword 'Tough'", async () => {
+  it("should only return screen print designs considered 'featured'", async () => {
     const designs = await getDesigns(dropboxCredentials, true);
-    const filteredDesigns = filterDesigns(
-      designs,
-      ["Tough"],
-      undefined,
-      undefined,
-      undefined,
-      "Screen Print"
-    );
-    checkResults(designs, filteredDesigns, [1003, 1, 11, 1012, 549]);
+    const filteredDesigns = filterDesigns(designs, {
+      designType: "Screen Print",
+      onlyFeatured: true,
+      newDesignReferenceDate: new Date("4/18/24").getTime(),
+    });
+    checkResults(filteredDesigns, ["458", "1091", "1234", "1659"]);
   });
 
-  it("should only return the single screen print design that contains the keyword 'Tough' and is in the 'Staff Favorites' subcategory", async () => {
+  it("should only return screen print designs that contain the keyword 'eagle'", async () => {
     const designs = await getDesigns(dropboxCredentials, true);
-    const filteredDesigns = filterDesigns(
-      designs,
-      ["Tough"],
-      undefined,
-      ["Staff Favorites"],
-      undefined,
-      "Screen Print"
-    );
-    checkResults(designs, filteredDesigns, [11]);
+    const filteredDesigns = filterDesigns(designs, {
+      designType: "Screen Print",
+      keywordsArray: ["eagle"],
+      allowDuplicateDesignNumbers: true,
+    });
+    checkResults(filteredDesigns, ["499", "1252", "1252", "1518", "1684"]);
   });
 
-  it("should only return embroidery designs that contain the keyword 'Tough' OR the keyword 'Bold'", async () => {
+  it("should only return the single embroidery design that contains the keyword 'carpenters' in the 'hats/beanies' subcategory", async () => {
     const designs = await getDesigns(dropboxCredentials, true);
-    const filteredDesigns = filterDesigns(
-      designs,
-      ["Tough", "Bold"],
-      undefined,
-      undefined,
-      undefined,
-      "Embroidery"
-    );
-    checkResults(designs, filteredDesigns, [1006, 1009, 205]);
+    const filteredDesigns = filterDesigns(designs, {
+      designType: "Embroidery",
+      keywordsArray: ["Carpenters"],
+      category: "Inspiration Board",
+      subcategoriesArray: ["Hats/Beanies"],
+    });
+    checkResults(filteredDesigns, ["754"]);
   });
 
-  it("should return the single design that contains the keyword 'Gold' OR the keyword 'Embossed'", async () => {
+  it("should only return embroidery designs in the 'inspiration board' parent category", async () => {
     const designs = await getDesigns(dropboxCredentials, true);
-    const filteredDesigns = filterDesigns(designs, ["Gold", "Embossed"]);
-    checkResults(designs, filteredDesigns, [1009]);
-  });
-
-  it("should only return designs that contain the keyword 'elit' OR the keyword 'Embossed'", async () => {
-    const designs = await getDesigns(dropboxCredentials, true);
-    const filteredDesigns = filterDesigns(designs, ["elit", "Embossed"]);
-    checkResults(
-      designs,
-      filteredDesigns,
-      [1009, 1000, 1025, 1003, 1012, 1016, 1018]
-    );
-  });
-
-  it("should find 0 screen print designs that contain the keyword 'Embossed'", async () => {
-    const designs = await getDesigns(dropboxCredentials, true);
-    const filteredDesigns = filterDesigns(
-      designs,
-      ["Embossed"],
-      undefined,
-      undefined,
-      undefined,
-      "Screen Print"
-    );
-    checkResults(designs, filteredDesigns, []);
-  });
-
-  it("should return embroidery designs that are in the 'Quick Search' category (regardless of subcategory)", async () => {
-    const designs = await getDesigns(dropboxCredentials, true);
-    const filteredDesigns = filterDesigns(
-      designs,
-      undefined,
-      "Quick Search",
-      undefined,
-      undefined,
-      "Embroidery"
-    );
-    checkResults(designs, filteredDesigns, [1001, 1006, 1009]);
-  });
-
-  it("should return the single screen print designs that is in the 'Holiday' category (regardless of subcategory)", async () => {
-    const designs = await getDesigns(dropboxCredentials, true);
-    const filteredDesigns = filterDesigns(
-      designs,
-      undefined,
-      "Holiday",
-      undefined,
-      undefined,
-      "Screen Print"
-    );
-    checkResults(designs, filteredDesigns, [1025]);
-  });
-
-  it("should only return new screen print designs (newer than 2 years)", async () => {
-    const designs = await getDesigns(dropboxCredentials, true);
-    const filteredDesigns = filterDesigns(
-      designs,
-      undefined,
-      undefined,
-      ["New Designs"],
-      undefined,
-      "Screen Print"
-    );
-    checkResults(
-      designs,
-      filteredDesigns,
-      [1003, 1, 11, 1013, 1015, 1016, 1017, 549]
-    );
-  });
-
-  it("should only return classic screen print designs (older than 2 years)", async () => {
-    const designs = await getDesigns(dropboxCredentials, true);
-    const filteredDesigns = filterDesigns(
-      designs,
-      undefined,
-      undefined,
-      ["Classics"],
-      undefined,
-      "Screen Print"
-    );
-    checkResults(designs, filteredDesigns, [1025, 1012, 1014, 1018]);
+    const filteredDesigns = filterDesigns(designs, {
+      designType: "Embroidery",
+      category: "Inspiration Board",
+      allowDuplicateDesignNumbers: true,
+    });
+    checkResults(filteredDesigns, [
+      "205",
+      "435",
+      "435",
+      "445",
+      "445",
+      "447",
+      "448",
+      "493",
+      "567",
+      "567",
+      "594",
+      "659",
+      "660",
+      "754",
+      "757",
+      "758",
+      "758",
+      "758",
+      "758",
+      "758",
+      "779",
+      "785",
+      "802",
+      "813",
+      "1046",
+      "1052",
+      "1190",
+      "1191",
+    ]);
   });
 });
 
 function checkResults(
-  allDesigns: TempDesign[],
   filteredDesigns: TempDesign[],
-  expectedDesignNumbers: number[]
+  expectedDesignNumbers: string[]
 ) {
   expect(filteredDesigns.length).toBe(expectedDesignNumbers.length);
   const filteredDesignNumbers = filteredDesigns.map(
-    (design) => +design.DesignNumber
+    (design) => design.DesignNumber
   );
   for (const designNumber of expectedDesignNumbers) {
     expect(filteredDesignNumbers).toContain(designNumber);

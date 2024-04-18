@@ -132,18 +132,17 @@ app.get("/designs/:designId?", async (req, res) => {
       return res.status(OK).send(designWithDesignId);
     }
 
-    const filteredDesigns = filterDesigns(
-      designs,
+    const filteredDesigns = filterDesigns(designs, {
       keywordsArray,
       category,
       subcategoriesArray,
       tagsArray,
       designType,
       onlyFeatured,
-      allowDuplicates,
+      allowDuplicateDesignNumbers: allowDuplicates,
       shouldExcludePrioritized,
-      similarToId
-    );
+      similarTo: similarToId,
+    });
     sortDesigns(filteredDesigns, sortingType);
 
     const paginated = getPageOfArray(
