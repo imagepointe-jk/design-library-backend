@@ -45,6 +45,19 @@ export function filterDesigns(
     const excludePrioritizedCheck =
       Priority === undefined || !shouldExcludePrioritized;
     const similarDesignCheck = matchSimilarDesign(design, designToCompare);
+    if (DesignNumber === "1739")
+      console.log(
+        isPublished,
+        hasDesignNumber,
+        duplicateDesignNumberCheck,
+        designTypeCheck,
+        categoryCheck,
+        subcategoryCheck,
+        featuredCheck,
+        keywordCheck,
+        excludePrioritizedCheck,
+        similarDesignCheck
+      );
 
     return (
       isPublished &&
@@ -87,22 +100,37 @@ function matchDesignKeywords(design: TempDesign, keywordsArray: string[]) {
 }
 
 function matchDesignCategories(design: TempDesign, category: string) {
-  return getDesignCategoryHierarchies(design).some((hierarchy) => {
-    const parentCategoryListed =
+  const hierarchies = getDesignCategoryHierarchies(design);
+  const designAge = getDesignAgeClassification(design);
+  if (designAge === "New") hierarchies.push("Quick Search");
+  return hierarchies.some((hierarchy) => {
+    const parentCategory =
       hierarchy && splitDesignCategoryHierarchy(hierarchy).category;
-    const designAge = getDesignAgeClassification(design);
-    //if this design is screen print AND considered new, then it should be treated as being in the "New Designs" category.
-    //and "New Designs" has "Quick Search" as its parent category (per strategy document).
-    //So all new screen print designs have "Quick Search" as their parent category.
-    const parentCategoryToUse =
-      designAge === "New" && design.DesignType === "Screen Print"
-        ? "Quick Search"
-        : parentCategoryListed;
     return (
-      parentCategoryToUse &&
-      category.toLocaleLowerCase() === parentCategoryToUse?.toLocaleLowerCase()
+      parentCategory &&
+      category.toLocaleLowerCase() === parentCategory.toLocaleLowerCase()
     );
   });
+  // return getDesignCategoryHierarchies(design).some((hierarchy) => {
+  //   const parentCategoryListed =
+  //     hierarchy && splitDesignCategoryHierarchy(hierarchy).category;
+  //   //if this design is screen print AND considered new, then it should be treated as being in the "New Designs" category.
+  //   //and "New Designs" has "Quick Search" as its parent category (per strategy document).
+  //   //So all new screen print designs have "Quick Search" as their parent category.
+  //   const parentCategoryToUse =
+  //     designAge === "New" && design.DesignType === "Screen Print"
+  //       ? "Quick Search"
+  //       : parentCategoryListed;
+  //   if (design.DesignNumber === "1739") {
+  //     console.log(
+  //       `parentCategoryToUse = ${parentCategoryToUse}, checking if ${category.toLocaleLowerCase()} === ${parentCategoryToUse?.toLocaleLowerCase()}`
+  //     );
+  //   }
+  //   return (
+  //     parentCategoryToUse &&
+  //     category.toLocaleLowerCase() === parentCategoryToUse?.toLocaleLowerCase()
+  //   );
+  // });
 }
 
 function matchDesignSubcategories(
