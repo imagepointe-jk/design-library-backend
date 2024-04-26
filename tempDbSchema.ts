@@ -61,16 +61,20 @@ export const tempDbSchema = z.object({
   Colors: z.array(z.string()),
 });
 
+const quoteRequestDesignSchema = z.object({
+  id: z.number(),
+  designNumber: z.string(),
+  garmentColor: z.string(),
+});
+
 export const quoteRequestSchema = z.object({
   firstName: z.string(),
   lastName: z.string(),
   email: z.string().email(),
   phone: z.number(),
-  designId: z.number(),
   union: z.string(),
   comments: z.string(),
-  garmentColor: z.string(),
-  designNumber: z.string(),
+  designs: z.array(quoteRequestDesignSchema),
 });
 
 export type DesignType = z.infer<typeof designTypeSchema>;
