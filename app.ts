@@ -38,6 +38,7 @@ const isDevMode = app.get("env") === "development";
 const allowedOrigins = [
   "https://react-frontend-production-93c4.up.railway.app",
   "https://react-frontend-development-31c4.up.railway.app",
+  "https://iframe-friendly-production.up.railway.app/",
   "https://www.imagepointe.com",
 ];
 app.use((req, res, next) => {
