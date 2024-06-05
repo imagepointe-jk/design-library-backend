@@ -1,0 +1,50 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New Design Quote Request</title>
+  </head>
+  <body>
+    <p>A user has requested quote(s) for one or more designs. The details of
+      their submitted request are below.</p>
+    <ul>
+      <li>First Name: {{firstName}}</li>
+      <li>Last Name: {{lastName}}</li>
+      <li>Email: {{email}}</li>
+      <li>Phone number: {{phone}}</li>
+      <li>Union: {{union}}</li>
+      <li>Comments: {{comments}}</li>
+
+      <table style="border-collapse: collapse;">
+        <thead>
+          <tr>
+            <th
+              style="border: 1px solid black; padding: 8px; background-color: lightgray;"
+            >Design Number</th>
+            <th
+              style="border: 1px solid black; padding: 8px; background-color: lightgray;"
+            >Garment Color</th>
+            <th
+              style="border: 1px solid black; padding: 8px; background-color: lightgray;"
+            >Link To Design</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each designs}}
+            <tr>
+              <td
+                style="border: 1px solid black; padding: 8px;"
+              >{{designNumber}}</td>
+              <td
+                style="border: 1px solid black; padding: 8px;"
+              >{{garmentColor}}</td>
+              <td style="border: 1px solid black; padding: 8px;"><a
+                  href="https://www.imagepointe.com/design-library/?viewDesign={{id}}"
+                >View Design</a></td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </ul>
+  </body>
+</html>

@@ -2,31 +2,48 @@ import { DesignType, TempDesign } from "./tempDbSchema";
 import { SortingType } from "./types";
 import {
   getDesignNumber,
-  getDesignCategoryHierarchies,
   getDesignTags,
-  splitDesignCategoryHierarchy,
   shouldDesignBeFeatured,
   getDesignAgeClassification,
+  getDesignCategoryData,
 } from "./utility";
 
 const minimumTagsInCommon = 3; //how many tags two designs must have in common to be considered "similar"
 
 export function filterDesigns(
   designs: TempDesign[],
-  keywordsArray?: string[],
-  category?: string,
-  subcategoriesArray?: string[],
-  tagsArray?: string[],
-  designType?: DesignType,
-  onlyFeatured?: boolean,
-  allowDuplicateDesignNumbers?: boolean,
-  shouldExcludePrioritized?: boolean,
-  similarTo?: number
+  params: {
+    keywordsArray?: string[];
+    category?: string;
+    subcategoriesArray?: string[];
+    tagsArray?: string[];
+    designType?: DesignType;
+    onlyFeatured?: boolean;
+    allowDuplicateDesignNumbers?: boolean;
+    shouldExcludePrioritized?: boolean;
+    similarTo?: number;
+    newDesignReferenceDate?: number;
+  }
 ) {
+  const {
+    allowDuplicateDesignNumbers,
+    category,
+    designType,
+    keywordsArray,
+    onlyFeatured,
+    shouldExcludePrioritized,
+    similarTo,
+    subcategoriesArray,
+    tagsArray,
+    newDesignReferenceDate,
+  } = params;
   const designToCompare = designs.find((design) => design.Id === similarTo);
   return designs.filter((design, i, arr) => {
     const { DesignType, DesignNumber, Status, Priority } = design;
-    const treatAsFeatured = shouldDesignBeFeatured(design);
+    const treatAsFeatured = shouldDesignBeFeatured(
+      design,
+      newDesignReferenceDate
+    );
 
     const isPublished = Status !== "Draft";
     const hasDesignNumber = DesignNumber !== `${undefined}`;
@@ -68,9 +85,11 @@ function matchDesignKeywords(design: TempDesign, keywordsArray: string[]) {
   const lowerCaseTags = getDesignTags(design).map((tag) =>
     tag?.toLocaleLowerCase()
   );
-  const lowerCaseHierarchies = getDesignCategoryHierarchies(design)
-    .map((hierarchy) => hierarchy?.toLocaleLowerCase())
-    .join(" ");
+  const categoryData = getDesignCategoryData(design);
+  const lowercaseCategoryWords = [
+    ...categoryData.categories.map((cat) => cat.toLocaleLowerCase()),
+    ...categoryData.subcategories.map((sub) => sub.toLocaleLowerCase()),
+  ].join(" ");
   const lowerCaseDesignNumber = DesignNumber.toLocaleLowerCase();
 
   return keywordsArray.some((keyword) => {
@@ -80,24 +99,23 @@ function matchDesignKeywords(design: TempDesign, keywordsArray: string[]) {
       lowerCaseName.includes(lowerCaseKeyword) ||
       lowerCaseDescription?.includes(lowerCaseKeyword) ||
       lowerCaseTags.includes(lowerCaseKeyword) ||
-      lowerCaseHierarchies.includes(lowerCaseKeyword) ||
+      lowercaseCategoryWords.includes(lowerCaseKeyword) ||
       lowerCaseDesignNumber.includes(lowerCaseKeyword)
     );
   });
 }
 
 function matchDesignCategories(design: TempDesign, category: string) {
-  const hierarchies = getDesignCategoryHierarchies(design);
-  const designAge = getDesignAgeClassification(design);
-  if (designAge === "New") hierarchies.push("Quick Search");
-  return hierarchies.some((hierarchy) => {
-    const parentCategory =
-      hierarchy && splitDesignCategoryHierarchy(hierarchy).category;
-    return (
-      parentCategory &&
-      category.toLocaleLowerCase() === parentCategory.toLocaleLowerCase()
-    );
-  });
+  //Currently all designs are considered either "new" or "classics".
+  //and "new" and "classics" are both under the "quick search" category.
+  //so currently ALL designs are in quick search.
+  if (category === "Quick Search") return true;
+
+  const categoryData = getDesignCategoryData(design);
+  return categoryData.categories.some(
+    (designCategory) =>
+      designCategory.toLocaleLowerCase() === category.toLocaleLowerCase()
+  );
 }
 
 function matchDesignSubcategories(
@@ -107,21 +125,16 @@ function matchDesignSubcategories(
   const lowerCaseQuerySubcategories = querySubcategoriesArray.map(
     (subcategory) => subcategory.toLocaleLowerCase()
   );
+  const categoryData = getDesignCategoryData(design);
   const designAge = getDesignAgeClassification(design);
   const ageMatch =
     (lowerCaseQuerySubcategories.includes("new designs") &&
       designAge === "New") ||
     (lowerCaseQuerySubcategories.includes("classics") &&
       designAge === "Classic");
-  const otherMatch = getDesignCategoryHierarchies(design).some((hierarchy) => {
-    const subcategory =
-      hierarchy && splitDesignCategoryHierarchy(hierarchy).subcategory;
-
-    return (
-      subcategory &&
-      lowerCaseQuerySubcategories.includes(subcategory?.toLocaleLowerCase())
-    );
-  });
+  const otherMatch = categoryData.subcategories.some((sub) =>
+    lowerCaseQuerySubcategories.includes(sub.toLocaleLowerCase())
+  );
 
   return ageMatch || otherMatch;
 }

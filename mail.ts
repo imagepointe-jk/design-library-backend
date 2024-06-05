@@ -1,6 +1,8 @@
 import nodemailer from "nodemailer";
 import Mail from "nodemailer/lib/mailer";
 import { QuoteRequest } from "./tempDbSchema";
+import fs from "fs";
+import handlebars from "handlebars";
 
 const designLibraryUrl = (isDevMode: boolean) =>
   isDevMode
@@ -39,41 +41,19 @@ function sendEmail(recipientAddress: string, subject: string, message: string) {
   });
 }
 
-export function sendQuoteRequestEmail(
-  quoteRequest: QuoteRequest,
-  isDevMode: boolean
-) {
-  const {
-    comments,
-    designId,
-    designNumber,
-    garmentColor,
-    email,
-    firstName,
-    lastName,
-    phone,
-    union,
-  } = quoteRequest;
+export function sendQuoteRequestEmail(quoteRequest: QuoteRequest) {
   const salesEmail = process.env.QUOTE_REQUEST_DEST_EMAIL;
   if (!salesEmail) {
     throw new Error("Missing sales email!");
   }
 
-  const message = `A user has requested a quote for a design. The details of their submitted form are below.
-        <ul>
-        <li>First Name: ${firstName}</li>
-        <li>Last Name: ${lastName}</li>
-        <li>Email: ${email}</li>
-        <li>Phone number: ${phone}</li>
-        <li>Union: ${union}</li>
-        <li>Comments: ${comments === "" ? "(No comments)" : comments}</li>
-        <li>Design Number: ${designNumber}</li>
-        <li>Garment Color: ${garmentColor}</li>
-        </ul>
-        The specific design they requested can be found at the following link. If you see multiple designs, the first one in the series will be the one they requested.
-        <a href="${designLibraryUrl(
-          isDevMode
-        )}/?viewDesign=${designId}">View Design</a>`;
+  try {
+    const templateSource = fs.readFileSync("./quoteRequestEmail.hbs", "utf-8");
+    const template = handlebars.compile(templateSource);
+    const message = template(quoteRequest);
 
-  sendEmail(salesEmail, "New Design Quote Request", message);
+    sendEmail(salesEmail, "New Design Quote Request", message);
+  } catch (error) {
+    console.error("Failed to send a quote request!", quoteRequest);
+  }
 }

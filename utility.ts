@@ -57,7 +57,7 @@ export function getDesignTags(design: TempDesign) {
   ];
 }
 
-export function getDesignCategoryHierarchies(design: TempDesign) {
+export function getDesignCategoryData(design: TempDesign) {
   const {
     Subcategory1,
     Subcategory2,
@@ -65,7 +65,19 @@ export function getDesignCategoryHierarchies(design: TempDesign) {
     Subcategory4,
     Subcategory5,
   } = design;
-  return [Subcategory1, Subcategory2, Subcategory3, Subcategory4, Subcategory5];
+  const subcategories: string[] = [];
+  if (Subcategory1) subcategories.push(Subcategory1);
+  const splits = removeUndefined([
+    Subcategory1,
+    Subcategory2,
+    Subcategory3,
+    Subcategory4,
+    Subcategory5,
+  ]).map((sub) => splitDesignCategoryHierarchy(sub));
+  return {
+    categories: splits.map((split) => split.category),
+    subcategories: splits.map((split) => split.subcategory),
+  };
 }
 
 export function getDesignNumber(design: TempDesign) {
@@ -85,31 +97,44 @@ export function splitDesignCategoryHierarchy(hierarchy: string) {
   };
 }
 
-export function shouldDesignBeFeatured(design: TempDesign) {
+export function shouldDesignBeFeatured(
+  design: TempDesign,
+  referenceDate?: number
+) {
   if (design.Featured) return true;
 
-  const isBestSeller = getDesignCategoryHierarchies(design).some((hierarchy) =>
-    hierarchy
-      ? splitDesignCategoryHierarchy(hierarchy).subcategory === "Best Sellers"
-      : false
+  const isBestSeller = getDesignCategoryData(design).subcategories.some(
+    (sub) => sub === "Best Sellers"
   );
-  const isNew = getDesignAgeClassification(design) === "New";
+  const isNew = getDesignAgeClassification(design, referenceDate) === "New";
 
   return isBestSeller && isNew;
 }
 
-export function getDesignAgeClassification(design: TempDesign) {
-  const ageInYears = getDesignAgeInDays(design) / 365;
+export function getDesignAgeClassification(
+  design: TempDesign,
+  referenceDate?: number
+) {
+  const ageInYears = getDesignAgeInDays(design, referenceDate) / 365;
   return ageInYears < 2 ? "New" : "Classic";
 }
 
-function getDesignAgeInDays(design: TempDesign) {
+function getDesignAgeInDays(design: TempDesign, referenceDate?: number) {
   const designDate = design.Date ? new Date(design.Date) : null;
   if (!designDate || isNaN(+designDate)) {
     return Number.MAX_SAFE_INTEGER;
   }
 
-  const difference = Date.now() - designDate.getTime();
+  const laterDate = referenceDate ? referenceDate : Date.now();
+  const difference = laterDate - designDate.getTime();
   const msInDay = 1000 * 60 * 60 * 24;
   return difference / msInDay;
+}
+
+function removeUndefined<T>(arr: (T | undefined)[]) {
+  const newArr: T[] = [];
+  for (const el of arr) {
+    if (el !== undefined) newArr.push(el);
+  }
+  return newArr;
 }

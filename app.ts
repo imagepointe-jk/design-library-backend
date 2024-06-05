@@ -133,18 +133,17 @@ app.get("/designs/:designId?", async (req, res) => {
       return res.status(OK).send(designWithDesignId);
     }
 
-    const filteredDesigns = filterDesigns(
-      designs,
+    const filteredDesigns = filterDesigns(designs, {
       keywordsArray,
       category,
       subcategoriesArray,
       tagsArray,
       designType,
       onlyFeatured,
-      allowDuplicates,
+      allowDuplicateDesignNumbers: allowDuplicates,
       shouldExcludePrioritized,
-      similarToId
-    );
+      similarTo: similarToId,
+    });
     sortDesigns(filteredDesigns, sortingType);
 
     const paginated = getPageOfArray(
@@ -234,7 +233,7 @@ app.post("/quote-request", async (req, res) => {
         .send(message("Invalid authorization."));
     }
     const parsedBody = parseQuoteRequest(req.body);
-    sendQuoteRequestEmail(parsedBody, isDevMode);
+    sendQuoteRequestEmail(parsedBody);
     return res.status(OK).send();
   } catch (error) {
     if (error instanceof ZodError) {
